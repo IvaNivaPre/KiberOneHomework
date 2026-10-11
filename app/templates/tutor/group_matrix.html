@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Светофор выполнения ДЗ — {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Navigation -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+                <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+                <span>/</span>
+                <a href="/tutor/group/{{ group.id }}" class="hover:text-purple-600 transition">{{ group.name }}</a>
+                <span>/</span>
+                <span class="text-slate-600 font-bold">Светофор сдачи ДЗ</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/30">
+                    <i class="fa-solid fa-traffic-light"></i>
+                </span>
+                <span>Матрица сдачи ДЗ: {{ group.name }}</span>
+            </h1>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="/tutor/group/{{ group.id }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-folder-tree"></i>
+                <span>Модули и уроки</span>
+            </a>
+            <a href="/tutor/students" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-md shadow-purple-600/20">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Добавить ученика</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Visual Legend (Светофор) -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-purple-600"></i>
+            <span>Обозначения светофора:</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <i class="fa-solid fa-circle-check mr-1.5 text-emerald-600"></i> Выполнено и проверено
+            </span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 border border-amber-300">
+                <i class="fa-solid fa-clock mr-1.5 text-amber-600"></i> Сдано (ждет проверки)
+            </span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 border border-rose-300">
+                <i class="fa-solid fa-circle-xmark mr-1.5 text-rose-600"></i> Не сдано / Не приступал
+            </span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-orange-100 text-orange-800 border border-orange-300">
+                <i class="fa-solid fa-rotate-left mr-1.5 text-orange-600"></i> Требует доработки
+            </span>
+        </div>
+    </div>
+
+    <!-- The Matrix Table -->
+    {% if matrix_rows and lessons %}
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-left text-sm">
+                <thead>
+                    <tr class="bg-slate-900 text-white text-xs">
+                        <!-- Sticky student column -->
+                        <th class="p-4 min-w-[220px] font-bold sticky left-0 bg-slate-900 z-20 border-r border-slate-800">
+                            Резидент KIBERone ({{ matrix_rows|length }})
+                        </th>
+                        {% for lesson in lessons %}
+                        <th class="p-4 min-w-[170px] font-semibold text-center border-r border-slate-800">
+                            <div class="truncate max-w-[160px] font-bold text-cyan-300" title="{{ lesson.title }}">
+                                {{ lesson.title }}
+                            </div>
+                            <div class="text-[10px] text-slate-400 font-normal mt-0.5">
+                                {% if lesson.deadline %}
+                                    <i class="fa-regular fa-clock mr-1"></i>{{ lesson.deadline.strftime('%d.%m %H:%M') }}
+                                {% else %}
+                                    Бессрочно
+                                {% endif %}
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for row in matrix_rows %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <!-- Student Name (Sticky Column) -->
+                        <td class="p-4 font-bold text-slate-900 sticky left-0 bg-white z-10 border-r border-slate-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-xs">
+                                    {{ row.student.full_name[:1] }}
+                                </div>
+                                <div>
+                                    <div class="leading-tight">{{ row.student.full_name }}</div>
+                                    <div class="text-[11px] font-mono text-slate-400 font-normal">@{{ row.student.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Lesson Cells with Traffic Light Badges -->
+                        {% for cell in row.cells %}
+                        <td class="p-3 text-center border-r border-slate-100">
+                            {% if cell.status_type == 'reviewed' %}
+                                <!-- 🟢 GREEN CHECKMARK: Reviewed & Graded -->
+                                <a href="/tutor/submission/{{ cell.submission.id }}"
+                                   class="group inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition shadow-sm hover:scale-102"
+                                   title="Проверено! Нажмите для просмотра деталей">
+                                    <div class="flex items-center space-x-1 font-black text-xs">
+                                        <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                                        <span>СДАНО</span>
+                                    </div>
+                                    <div class="text-[11px] font-bold text-emerald-700 mt-0.5">
+                                        Оценка: {{ cell.submission.grade or 'Зачет' }}
+                                    </div>
+                                </a>
+
+                            {% elif cell.status_type == 'quiz_passed' %}
+                                <!-- 🟢 GREEN CHECKMARK: Quiz Passed -->
+                                <div class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300">
+                                    <div class="flex items-center space-x-1 font-black text-xs">
+                                        <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                                        <span>ТЕСТ СДАН</span>
+                                    </div>
+                                    <div class="text-[11px] font-bold text-emerald-700 mt-0.5">
+                                        {{ cell.quiz_result.percentage }}% ({{ cell.quiz_result.score }}/{{ cell.quiz_result.max_score }})
+                                    </div>
+                                </div>
+
+                            {% elif cell.status_type == 'submitted' %}
+                                <!-- 🟡 YELLOW BADGE: Submitted, waiting for tutor review -->
+                                <a href="/tutor/submission/{{ cell.submission.id }}"
+                                   class="group inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition shadow-sm hover:scale-102 animate-pulse"
+                                   title="Новая работа! Нажмите для проверки">
+                                    <div class="flex items-center space-x-1 font-black text-xs">
+                                        <i class="fa-solid fa-clock text-amber-600 text-base"></i>
+                                        <span>НА ПРОВЕРКЕ</span>
+                                    </div>
+                                    <div class="text-[10px] font-semibold text-amber-700 mt-0.5 flex items-center gap-1">
+                                        <span>Проверить</span>
+                                        <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                                    </div>
+                                </a>
+
+                            {% elif cell.status_type == 'revision' %}
+                                <!-- 🟠 ORANGE BADGE: Needs revision -->
+                                <a href="/tutor/submission/{{ cell.submission.id }}"
+                                   class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-300 transition">
+                                    <div class="flex items-center space-x-1 font-bold text-xs">
+                                        <i class="fa-solid fa-rotate-left text-orange-500 text-sm"></i>
+                                        <span>ДОРАБОТКА</span>
+                                    </div>
+                                    <div class="text-[10px] text-orange-600 mt-0.5">Ждет исправления</div>
+                                </a>
+
+                            {% elif cell.status_type == 'overdue' %}
+                                <!-- 🔴 RED CROSSMARK: Overdue -->
+                                <div class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-300">
+                                    <div class="flex items-center space-x-1 font-black text-xs">
+                                        <i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>
+                                        <span>ПРОСРОЧЕНО</span>
+                                    </div>
+                                    <div class="text-[10px] font-bold text-rose-600 mt-0.5">Не сдавал</div>
+                                </div>
+
+                            {% else %}
+                                <!-- 🔴 RED / GREY MARKER: Not started / missing -->
+                                <div class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200">
+                                    <div class="flex items-center space-x-1 font-bold text-xs text-rose-500">
+                                        <i class="fa-solid fa-xmark text-base"></i>
+                                        <span>НЕ СДАНО</span>
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">Не приступал</div>
+                                </div>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
+        <i class="fa-solid fa-clipboard-list text-4xl text-slate-300"></i>
+        <h3 class="text-lg font-bold text-slate-800">Матрица пуста</h3>
+        <p class="text-sm text-slate-500 max-w-md mx-auto">
+            Для отображения светофора добавьте учеников в эту группу и создайте уроки с домашними заданиями.
+        </p>
+        <div class="flex items-center justify-center gap-3 pt-2">
+            <a href="/tutor/group/{{ group.id }}" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl">
+                Создать уроки
+            </a>
+            <a href="/tutor/students" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">
+                Назначить учеников
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

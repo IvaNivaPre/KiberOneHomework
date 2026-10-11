@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет — KIBERone{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Welcome Hero -->
+    <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="space-y-2 z-10">
+            <div class="inline-flex items-center space-x-2 bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                <i class="fa-solid fa-gamepad"></i>
+                <span>Личный кабинет резидента</span>
+            </div>
+            <h1 class="text-3xl font-black tracking-tight">Привет, {{ current_user.full_name }}! 🚀</h1>
+            <p class="text-purple-200/80 text-sm max-w-xl">
+                {% if group %}
+                    Группа: <strong class="text-cyan-300">{{ group.name }}</strong>. 
+                {% endif %}
+                Выполняй домашние задания вовремя, зажигай зеленые галочки и прокачивай навыки кибер-героя!
+            </p>
+        </div>
+
+        <div class="z-10 flex items-center gap-3">
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-w-[130px]">
+                <div class="text-2xl font-black text-emerald-400 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>{{ sub_map|length }}</span>
+                </div>
+                <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mt-1">Сдано заданий</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules and Lessons with Completion Indicators -->
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
+                <i class="fa-solid fa-layer-group text-purple-600"></i>
+                <span>Учебная программа</span>
+            </h2>
+        </div>
+
+        {% if modules %}
+            {% for mod in modules %}
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8 space-y-6">
+                <!-- Module Header -->
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-100 text-cyan-800 uppercase tracking-wider">
+                        Модуль {{ loop.index }}
+                    </span>
+                    <h3 class="text-xl font-black text-slate-900 mt-1">{{ mod.title }}</h3>
+                    {% if mod.description %}
+                    <p class="text-xs text-slate-500 mt-0.5">{{ mod.description }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Lessons in Module -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {% for lesson in mod.lessons %}
+                        {% set sub = sub_map.get(lesson.id) %}
+                        {% set qr = quiz_map.get(lesson.quiz.id) if lesson.quiz else None %}
+                        {% set is_overdue = lesson.deadline and now > lesson.deadline and not sub %}
+
+                        <div class="rounded-2xl border transition p-5 flex flex-col justify-between space-y-4
+                            {% if sub and sub.status == 'reviewed' %}
+                                bg-emerald-50/40 border-emerald-300 hover:border-emerald-400 shadow-sm
+                            {% elif sub and sub.status == 'submitted' %}
+                                bg-amber-50/40 border-amber-300 hover:border-amber-400 shadow-sm
+                            {% elif is_overdue %}
+                                bg-rose-50/40 border-rose-300 hover:border-rose-400
+                            {% else %}
+                                bg-slate-50/50 border-slate-200 hover:border-purple-300
+                            {% endif %}">
+
+                            <div class="space-y-3">
+                                <!-- Top status badge (ЗЕЛЕНАЯ / КРАСНАЯ ГАЛОЧКА) -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">
+                                        Урок {{ loop.index }}
+                                    </span>
+
+                                    {% if sub and sub.status == 'reviewed' %}
+                                        <!-- 🟢 ЗЕЛЕНАЯ ГАЛОЧКА: Проверено -->
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5 text-sm"></i>
+                                            <span>ВЫПОЛНЕНО ✓</span>
+                                        </span>
+                                    {% elif sub and sub.status == 'submitted' %}
+                                        <!-- 🟡 ЖЕЛТЫЙ: На проверке -->
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                            <i class="fa-solid fa-clock text-amber-600 mr-1.5"></i>
+                                            <span>На проверке</span>
+                                        </span>
+                                    {% elif sub and sub.status == 'needs_revision' %}
+                                        <!-- 🟠 ОРАНЖЕВЫЙ: Доработка -->
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-300">
+                                            <i class="fa-solid fa-rotate-left text-orange-600 mr-1.5"></i>
+                                            <span>Доработать</span>
+                                        </span>
+                                    {% elif qr and qr.passed %}
+                                        <!-- 🟢 ЗЕЛЕНАЯ ГАЛОЧКА: Тест сдан -->
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i>
+                                            <span>ТЕСТ СДАН ✓</span>
+                                        </span>
+                                    {% elif is_overdue %}
+                                        <!-- 🔴 КРАСНЫЙ МАРКЕР: Просрочено -->
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300">
+                                            <i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5 text-sm"></i>
+                                            <span>ПРОСРОЧЕНО ✕</span>
+                                        </span>
+                                    {% else %}
+                                        <!-- 🔴 КРАСНЫЙ МАРКЕР: Не выполнено -->
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                            <i class="fa-solid fa-xmark text-rose-500 mr-1.5"></i>
+                                            <span>Не выполнено</span>
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <h4 class="text-base font-black text-slate-900 leading-snug">{{ lesson.title }}</h4>
+                                
+                                {% if lesson.description %}
+                                <p class="text-xs text-slate-500 line-clamp-2">{{ lesson.description }}</p>
+                                {% endif %}
+
+                                <!-- Grade or deadline badge -->
+                                <div class="pt-1">
+                                    {% if sub and sub.grade %}
+                                        <div class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-100/60 px-2.5 py-1 rounded-lg">
+                                            <i class="fa-solid fa-award text-emerald-600"></i>
+                                            <span>Оценка тьютора: {{ sub.grade }}</span>
+                                        </div>
+                                    {% elif lesson.deadline %}
+                                        <div class="text-[11px] font-semibold {% if is_overdue %}text-rose-600{% else %}text-slate-500{% endif %} flex items-center gap-1">
+                                            <i class="fa-regular fa-clock"></i>
+                                            <span>{{ lesson.deadline|deadline_badge }} (до {{ lesson.deadline.strftime('%d.%m %H:%M') }})</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Action button -->
+                            <div class="pt-3 border-t border-slate-200/60">
+                                <a href="/student/lesson/{{ lesson.id }}"
+                                   class="w-full py-2.5 px-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-purple-600/20">
+                                    <span>{% if sub %}Посмотреть работу{% else %}Открыть урок и сдать ДЗ{% endif %}</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-white rounded-3xl border border-dashed border-slate-200 p-12 text-center text-slate-400">
+                <i class="fa-solid fa-graduation-cap text-4xl mb-3 text-slate-300"></i>
+                <div class="font-bold text-slate-700">Уроки пока не добавлены</div>
+                <div class="text-xs mt-1">Тьютор скоро добавит материалы для вашей группы!</div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

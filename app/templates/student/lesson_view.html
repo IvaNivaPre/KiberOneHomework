@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} — KIBERone{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+
+    <!-- Breadcrumb & Top Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+                <a href="/student/dashboard" class="hover:text-purple-600 transition">Личный кабинет</a>
+                <span>/</span>
+                <span class="text-slate-600 font-bold">{{ lesson.module.title }}</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-laptop-code"></i>
+                </span>
+                <span>{{ lesson.title }}</span>
+            </h1>
+        </div>
+
+        <a href="/student/dashboard" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center space-x-1.5 w-fit">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>К списку уроков</span>
+        </a>
+    </div>
+
+    <!-- Deadline Alert -->
+    {% if lesson.deadline %}
+    <div class="p-4 rounded-2xl flex items-center justify-between gap-4 text-xs font-semibold
+        {% if is_overdue %}bg-rose-50 border border-rose-200 text-rose-800{% else %}bg-amber-50 border border-amber-200 text-amber-900{% endif %}">
+        <div class="flex items-center space-x-2.5">
+            <i class="fa-regular fa-clock text-base {% if is_overdue %}text-rose-600{% else %}text-amber-600{% endif %}"></i>
+            <div>
+                <span class="font-bold">Дедлайн по заданию:</span>
+                <span>{{ lesson.deadline|datetime }}</span>
+                <span class="ml-2 font-normal">({{ lesson.deadline|deadline_badge }})</span>
+            </div>
+        </div>
+        {% if is_overdue %}
+            <span class="px-2.5 py-0.5 rounded-full bg-rose-200 text-rose-900 text-[10px] font-black uppercase">Срок истек</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Lesson Description & Instructions -->
+    {% if lesson.description %}
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-purple-600 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Пояснение к уроку и заданию</span>
+        </h2>
+        <div class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+{{ lesson.description }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Materials Section (Google Drive files, Links, etc.) -->
+    {% if lesson.materials %}
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-5">
+        <h2 class="text-lg font-black text-slate-900 flex items-center gap-2.5">
+            <i class="fa-solid fa-folder-open text-cyan-600"></i>
+            <span>Учебные материалы для скачивания</span>
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {% for mat in lesson.materials %}
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-slate-50 hover:border-purple-300 transition flex flex-col justify-between space-y-3">
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0
+                        {% if mat.material_type == 'file' %}
+                            {% if mat.file_name and mat.file_name.endswith('.pdf') %}bg-rose-100 text-rose-600
+                            {% elif mat.file_name and (mat.file_name.endswith('.doc') or mat.file_name.endswith('.docx')) %}bg-blue-100 text-blue-600
+                            {% elif mat.file_name and (mat.file_name.endswith('.xls') or mat.file_name.endswith('.xlsx')) %}bg-emerald-100 text-emerald-600
+                            {% else %}bg-purple-100 text-purple-600{% endif %}
+                        {% elif mat.material_type == 'link' %}bg-cyan-100 text-cyan-600
+                        {% else %}bg-slate-200 text-slate-700{% endif %}">
+                        {% if mat.material_type == 'file' %}
+                            {% if mat.file_name and mat.file_name.endswith('.pdf') %}<i class="fa-solid fa-file-pdf"></i>
+                            {% elif mat.file_name and (mat.file_name.endswith('.doc') or mat.file_name.endswith('.docx')) %}<i class="fa-solid fa-file-word"></i>
+                            {% elif mat.file_name and (mat.file_name.endswith('.xls') or mat.file_name.endswith('.xlsx')) %}<i class="fa-solid fa-file-excel"></i>
+                            {% else %}<i class="fa-solid fa-file"></i>{% endif %}
+                        {% elif mat.material_type == 'link' %}
+                            <i class="fa-solid fa-link"></i>
+                        {% else %}
+                            <i class="fa-solid fa-file-lines"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 leading-snug">{{ mat.title }}</h4>
+                        {% if mat.description %}
+                        <p class="text-xs text-slate-500 mt-0.5">{{ mat.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    {% if mat.material_type == 'file' and mat.file_url %}
+                        <a href="{{ mat.file_url }}" target="_blank"
+                           class="w-full py-2 px-3 bg-white hover:bg-purple-50 text-purple-700 font-bold text-xs rounded-xl border border-purple-200 flex items-center justify-center space-x-1.5 transition">
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                            <span>Скачать / Открыть ({% if mat.file_size %}{{ mat.file_size|filesize }}{% else %}Google Drive{% endif %})</span>
+                        </a>
+                    {% elif mat.material_type == 'link' and mat.external_link %}
+                        <a href="{{ mat.external_link }}" target="_blank"
+                           class="w-full py-2 px-3 bg-white hover:bg-cyan-50 text-cyan-700 font-bold text-xs rounded-xl border border-cyan-200 flex items-center justify-center space-x-1.5 transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span>Перейти на ресурс</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Interactive Quiz Card (if lesson has a quiz) -->
+    {% if lesson.quiz %}
+    <div class="bg-gradient-to-r from-cyan-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-lg space-y-4 relative overflow-hidden">
+        <div class="absolute right-0 top-0 w-48 h-48 bg-cyan-400/10 rounded-full blur-2xl pointer-events-none"></div>
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="inline-flex items-center space-x-1.5 bg-cyan-400/20 text-cyan-300 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Интерактивный тест</span>
+                </div>
+                <h3 class="text-xl font-black text-white">{{ lesson.quiz.title }}</h3>
+                <p class="text-xs text-cyan-200/80">{{ lesson.quiz.questions|length }} вопросов с автоматической проверкой</p>
+            </div>
+
+            <div>
+                {% if quiz_result %}
+                    <div class="text-right">
+                        <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black {% if quiz_result.passed %}bg-emerald-400 text-slate-900{% else %}bg-amber-400 text-slate-900{% endif %}">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Результат: {{ quiz_result.percentage }}% ({{ quiz_result.score }}/{{ quiz_result.max_score }})</span>
+                        </div>
+                        <a href="/student/quiz/{{ lesson.quiz.id }}" class="block text-xs text-cyan-300 hover:underline mt-1 font-semibold">
+                            Пройти заново &rarr;
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="/student/quiz/{{ lesson.quiz.id }}" class="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-cyan-400/20 transition flex items-center space-x-2">
+                        <span>Начать тест</span>
+                        <i class="fa-solid fa-play text-[10px]"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Homework Submission Section (Upload File, Text Answer, Google Drive) -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        
+        <!-- Header with Status Badge (ЗЕЛЕНАЯ / КРАСНАЯ ГАЛОЧКА) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div>
+                <h2 class="text-xl font-black text-slate-900 flex items-center gap-2.5">
+                    <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i>
+                    <span>Сдача домашнего задания</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">Прикрепи файл (проект, скриншот, код) или напиши ответ в поле</p>
+            </div>
+
+            <div>
+                {% if submission %}
+                    {% if submission.status == 'reviewed' %}
+                        <!-- 🟢 ЗЕЛЕНАЯ ГАЛОЧКА: Проверено -->
+                        <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-black shadow-sm">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                            <span>ЗАЧТЕНО (ЗЕЛЕНАЯ ГАЛОЧКА ✓)</span>
+                        </div>
+                    {% elif submission.status == 'needs_revision' %}
+                        <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-orange-800 border border-orange-300 text-xs font-bold">
+                            <i class="fa-solid fa-rotate-left text-orange-600"></i>
+                            <span>Требует доработки</span>
+                        </div>
+                    {% else %}
+                        <!-- 🟡 ЖЕЛТЫЙ: На проверке -->
+                        <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold">
+                            <i class="fa-solid fa-clock text-amber-600"></i>
+                            <span>Сдано (ожидает проверки)</span>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- 🔴 КРАСНЫЙ МАРКЕР: Не сдано -->
+                    <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
+                        <i class="fa-solid fa-circle-xmark text-rose-500 text-sm"></i>
+                        <span>Не сдано (Красный статус)</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- If student already has feedback from tutor -->
+        {% if submission and submission.grade %}
+        <div class="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-award text-emerald-600"></i>
+                    <span>Оценка тьютора:</span>
+                </span>
+                <span class="text-sm font-black text-emerald-800 bg-white px-3 py-1 rounded-xl shadow-sm border border-emerald-200">
+                    {{ submission.grade }}
+                </span>
+            </div>
+            {% if submission.tutor_comment %}
+            <div class="text-xs text-emerald-900 bg-white/70 p-3 rounded-xl border border-emerald-100 leading-relaxed">
+                <strong>Отзыв тьютора:</strong> {{ submission.tutor_comment }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- If student previously submitted, show current attachment -->
+        {% if submission %}
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+            <div class="font-bold text-slate-700">Твоя последняя отправка ({{ submission.submitted_at|datetime }}):</div>
+            {% if submission.file_url %}
+            <div class="flex items-center space-x-2 font-semibold text-indigo-700">
+                <i class="fa-solid fa-paperclip"></i>
+                <a href="{{ submission.file_url }}" target="_blank" class="hover:underline flex items-center gap-1">
+                    <span>{{ submission.file_name or 'Прикрепленный файл' }}</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+            {% endif %}
+            {% if submission.text_answer %}
+            <div class="text-slate-600 font-mono bg-white p-2.5 rounded-lg border border-slate-200 whitespace-pre-wrap">
+{{ submission.text_answer }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Submission Form -->
+        <form action="/student/lesson/{{ lesson.id }}/submit" method="POST" enctype="multipart/form-data" class="space-y-5">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                    1. Прикрепить файл с решением <span class="text-slate-400 font-normal">(загрузка на Google Drive)</span>
+                </label>
+                <div class="border-2 border-dashed border-slate-200 hover:border-purple-400 rounded-2xl p-4 transition bg-slate-50/50">
+                    <input type="file" name="file"
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.png,.jpg,.jpeg,.py,.txt,.sb3"
+                           class="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer">
+                    <p class="text-[11px] text-slate-400 mt-2">
+                        Поддерживаются форматы: Python (.py), Scratch (.sb3), Word, PDF, Excel, ZIP-архивы, изображения.
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                    2. Текстовый ответ или ссылка на проект
+                </label>
+                <textarea name="text_answer" rows="4" placeholder="Вставьте код решения, ссылку на Repl.it / GitHub или комментарий к домашней работе..."
+                          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-xs font-mono"></textarea>
+            </div>
+
+            <button type="submit"
+                    class="w-full py-3.5 px-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white font-black text-sm rounded-xl shadow-lg shadow-purple-600/30 transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>{% if submission %}Отправить обновленную версию ДЗ{% else %}Отправить домашнее задание на проверку{% endif %}</span>
+            </button>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

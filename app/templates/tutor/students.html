@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Ученики (Резиденты) — KIBERone{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </span>
+                <span>Резиденты KIBERone</span>
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Управление логинами и паролями для входа учеников в личный кабинет</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Add Student Form -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 h-fit">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-purple-600"></i>
+                <span>Добавить резидента</span>
+            </h2>
+
+            <form action="/tutor/students/add" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">ФИО Ученика</label>
+                    <input type="text" name="full_name" required placeholder="Например: Артем Соколов"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Логин для входа</label>
+                    <input type="text" name="username" required placeholder="Например: artem_s"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Пароль</label>
+                    <input type="text" name="password" required value="kiber123"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-mono font-medium">
+                    <p class="text-[11px] text-slate-400 mt-1">Можно задать простой пароль для ребенка</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Группа</label>
+                    <select name="group_id" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                        <option value="">Без группы</option>
+                        {% for g in groups %}
+                        <option value="{{ g.id }}">{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Создать аккаунт ученика</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Students List -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-emerald-600"></i>
+                    <span>Список резидентов и данные для входа ({{ students|length }})</span>
+                </h2>
+            </div>
+
+            {% if students %}
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                                <tr>
+                                    <th class="p-4">Ученик</th>
+                                    <th class="p-4">Группа</th>
+                                    <th class="p-4">Логин</th>
+                                    <th class="p-4">Пароль</th>
+                                    <th class="p-4 text-center">Сдано ДЗ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for s in students %}
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="p-4 font-bold text-slate-900 flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold text-xs">
+                                            {{ s.full_name[:1] }}
+                                        </div>
+                                        <span>{{ s.full_name }}</span>
+                                    </td>
+                                    <td class="p-4">
+                                        {% if s.group %}
+                                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100">
+                                                {{ s.group.name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-xs text-slate-400">Не назначена</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-4 font-mono text-xs font-bold text-slate-800">
+                                        {{ s.username }}
+                                    </td>
+                                    <td class="p-4 font-mono text-xs text-slate-700">
+                                        <span class="bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                                            {{ s.plain_password or '••••••••' }}
+                                        </span>
+                                    </td>
+                                    <td class="p-4 text-center font-bold text-xs">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                                            {{ s.submissions|length }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-400 text-sm">
+                    Ученики пока не добавлены. Заполните форму слева, чтобы выдать ребенку доступ.
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Конструктор теста — {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header & Navigation -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+                <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+                <span>/</span>
+                <a href="/tutor/lesson/{{ lesson.id }}" class="hover:text-purple-600 transition">{{ lesson.title }}</a>
+                <span>/</span>
+                <span class="text-slate-600 font-bold">Конструктор теста</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-file-circle-question"></i>
+                </span>
+                <span>{{ quiz.title }}</span>
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Интерактивное тестирование с автоматической проверкой ответов</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="/tutor/lesson/{{ lesson.id }}" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Вернуться к уроку</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Questions Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Add Question Form -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 h-fit">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-purple-600"></i>
+                <span>Добавить вопрос в тест</span>
+            </h2>
+
+            <form action="/tutor/quiz/{{ quiz.id }}/question/add" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Текст вопроса</label>
+                    <textarea name="question_text" rows="3" required placeholder="Например: Какая функция в Python используется для вывода текста в консоль?"
+                              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Тип вопроса</label>
+                    <select name="question_type" id="q_type" onchange="handleQuestionTypeChange()"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                        <option value="single">Одиночный выбор (Один верный ответ)</option>
+                        <option value="multiple">Множественный выбор (Несколько верных ответов)</option>
+                        <option value="text">Текстовый ответ (Точное совпадение слова/числа)</option>
+                    </select>
+                </div>
+
+                <div id="options_container">
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                        Варианты ответов <span class="text-slate-400 font-normal">(каждый с новой строки)</span>
+                    </label>
+                    <textarea name="options" id="options_field" rows="4" placeholder="print()&#10;input()&#10;echo()&#10;display()"
+                              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-mono text-xs"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                        Правильный ответ
+                    </label>
+                    <input type="text" name="correct_answers" required placeholder="Например: print() или 1 (номер варианта)"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                    <p class="text-[11px] text-slate-400 mt-1">Для одиночного/множественного выбора введите точный текст верного варианта или варианты через запятую</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Баллы за вопрос</label>
+                    <input type="number" name="points" value="1" min="1" max="10"
+                           class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20 transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Добавить вопрос</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Question List -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ol text-cyan-600"></i>
+                    <span>Вопросы теста ({{ quiz.questions|length }})</span>
+                </h2>
+                <span class="text-xs font-semibold text-slate-400">Порог сдачи: {{ quiz.passing_score }}%</span>
+            </div>
+
+            {% if quiz.questions %}
+                <div class="space-y-4">
+                    {% for q in quiz.questions %}
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 relative">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                                        Вопрос #{{ loop.index }}
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">
+                                        {% if q.question_type == 'single' %}Один вариант
+                                        {% elif q.question_type == 'multiple' %}Несколько вариантов
+                                        {% else %}Ввод текста{% endif %}
+                                    </span>
+                                    <span class="text-[11px] text-slate-400 font-semibold">• {{ q.points }} балл.</span>
+                                </div>
+                                <h3 class="text-base font-bold text-slate-900 pt-1">{{ q.question_text }}</h3>
+                            </div>
+
+                            <form action="/tutor/question/{{ q.id }}/delete" method="POST" onsubmit="return confirm('Удалить вопрос?');">
+                                <button type="submit" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg transition" title="Удалить вопрос">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Render Options -->
+                        {% if q.options_json and q.question_type in ['single', 'multiple'] %}
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5 font-medium">
+                            <div class="text-[10px] uppercase font-bold text-slate-400">Варианты ответов:</div>
+                            <div class="space-y-1">
+                                <!-- Quick client-side parse of options -->
+                                <div class="text-slate-700 font-mono text-[11px] whitespace-pre-wrap">{{ q.options_json }}</div>
+                            </div>
+                            <div class="text-[11px] text-emerald-700 font-bold pt-1">
+                                <i class="fa-solid fa-check text-emerald-500 mr-1"></i>Правильный ответ: {{ q.correct_answers_json }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+                            <div class="text-[11px] text-emerald-700 font-bold">
+                                <i class="fa-solid fa-check text-emerald-500 mr-1"></i>Правильный ответ: {{ q.correct_answers_json }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-white rounded-2xl border border-dashed border-slate-200 p-10 text-center text-slate-400 text-sm">
+                    <i class="fa-solid fa-feather text-3xl mb-2 text-slate-300"></i>
+                    <div class="font-bold text-slate-700">Вопросов пока нет</div>
+                    <div class="text-xs">Добавьте первый вопрос теста через форму слева.</div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function handleQuestionTypeChange() {
+        const type = document.getElementById('q_type').value;
+        const container = document.getElementById('options_container');
+        if (type === 'text') {
+            container.classList.add('hidden');
+        } else {
+            container.classList.remove('hidden');
+        }
+    }
+</script>
+{% endblock %}

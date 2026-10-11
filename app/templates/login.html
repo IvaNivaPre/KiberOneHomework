@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — KIBERone{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex items-center justify-center">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 sm:p-10">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-400 mx-auto flex items-center justify-center font-black text-white text-3xl shadow-lg shadow-purple-500/30 mb-4">
+                K1
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Личный кабинет</h1>
+            <p class="text-sm text-slate-500 mt-1">Вход для учеников и тьюторов KIBERone</p>
+        </div>
+
+        {% if error %}
+        <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center space-x-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-500 text-base"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form action="/login" method="POST" class="space-y-5">
+            <div>
+                <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Логин ученика / тьютора</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <input type="text" id="username" name="username" value="{{ username or '' }}" required autofocus
+                           placeholder="Например: ivan_petrov"
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-sm font-medium transition">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Пароль</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <input type="password" id="password" name="password" required
+                           placeholder="••••••••"
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-sm font-medium transition">
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="w-full py-3.5 px-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white font-bold rounded-xl shadow-lg shadow-purple-600/30 transition transform active:scale-98 flex items-center justify-center space-x-2">
+                <span>Войти в аккаунт</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+        </form>
+
+        <!-- Quick Demo Credentials Box -->
+        <div class="mt-8 pt-6 border-t border-slate-100">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 text-center">
+                Быстрый вход для проверки (Демо)
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button type="button" onclick="fillCreds('tutor', 'kiber2026')"
+                        class="p-2.5 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-100/70 text-purple-900 font-semibold text-left transition flex flex-col">
+                    <span class="text-[10px] text-purple-500 font-bold uppercase">Тьютор</span>
+                    <span>login: tutor</span>
+                    <span class="text-slate-500 font-normal">pass: kiber2026</span>
+                </button>
+                <button type="button" onclick="fillCreds('student1', 'student123')"
+                        class="p-2.5 rounded-xl border border-cyan-200 bg-cyan-50/50 hover:bg-cyan-100/70 text-cyan-900 font-semibold text-left transition flex flex-col">
+                    <span class="text-[10px] text-cyan-600 font-bold uppercase">Ученик</span>
+                    <span>login: student1</span>
+                    <span class="text-slate-500 font-normal">pass: student123</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fillCreds(u, p) {
+        document.getElementById('username').value = u;
+        document.getElementById('password').value = p;
+    }
+</script>
+{% endblock %}

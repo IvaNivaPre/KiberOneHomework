@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование урока — {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Breadcrumb & Top Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+                <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+                <span>/</span>
+                <a href="/tutor/group/{{ lesson.module.group.id }}" class="hover:text-purple-600 transition">{{ lesson.module.group.name }}</a>
+                <span>/</span>
+                <span class="text-slate-600 font-bold">{{ lesson.title }}</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </span>
+                <span>{{ lesson.title }}</span>
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Модуль: <span class="font-bold text-slate-700">{{ lesson.module.title }}</span> • Группа: <span class="font-bold text-slate-700">{{ lesson.module.group.name }}</span>
+            </p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="/tutor/group/{{ lesson.module.group.id }}/matrix" class="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl transition border border-emerald-300 flex items-center space-x-2">
+                <i class="fa-solid fa-traffic-light text-emerald-600"></i>
+                <span>Светофор сдачи ДЗ</span>
+            </a>
+            <a href="/tutor/lesson/{{ lesson.id }}/quiz" class="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-xs rounded-xl transition shadow-md shadow-purple-600/20 flex items-center space-x-2">
+                <i class="fa-solid fa-file-circle-question"></i>
+                <span>Конструктор теста {% if lesson.quiz %}({{ lesson.quiz.questions|length }} вопр.){% endif %}</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Storage alert / badge -->
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center justify-between text-xs text-blue-900">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-base">
+                <i class="fa-brands fa-google-drive"></i>
+            </div>
+            <div>
+                <span class="font-bold">Хранилище файлов:</span>
+                {% if storage_status.is_gdrive %}
+                    <span class="text-emerald-700 font-semibold">Файлы автоматически загружаются на Google Drive с публичной ссылкой для детей</span>
+                {% else %}
+                    <span class="text-amber-800 font-semibold">Локальный режим (для автоматической загрузки на Google Drive настройте service_account.json)</span>
+                {% endif %}
+            </div>
+        </div>
+        <a href="/tutor/settings" class="font-bold text-blue-700 hover:underline">Настройки &rarr;</a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left: Lesson Settings & Deadline -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-purple-600"></i>
+                    <span>Параметры и дедлайн</span>
+                </h2>
+
+                <form action="/tutor/lesson/{{ lesson.id }}/update" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Название урока</label>
+                        <input type="text" name="title" value="{{ lesson.title }}" required
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Пояснение / Описание ДЗ</label>
+                        <textarea name="description" rows="4" placeholder="Инструкции для учеников..."
+                                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">{{ lesson.description or '' }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                            <i class="fa-regular fa-clock text-amber-500 mr-1"></i>Дедлайн сдачи ДЗ
+                        </label>
+                        <input type="datetime-local" name="deadline"
+                               value="{% if lesson.deadline %}{{ lesson.deadline.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                        <p class="text-[11px] text-slate-400 mt-1">После этой даты статус не сданного ДЗ станет «Просрочено» (красный)</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="flex items-center space-x-2 text-xs font-bold text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="has_homework" value="true" {% if lesson.has_homework %}checked{% endif %}
+                                   class="rounded text-purple-600 focus:ring-purple-500 w-4 h-4">
+                            <span>Требуется сдача домашнего задания</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition">
+                        Сохранить параметры
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Materials upload (Files to Google Drive, Links, Text) -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Materials List -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-paperclip text-cyan-600"></i>
+                            <span>Материалы к уроку ({{ lesson.materials|length }})</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">PDF методички, Word, Excel, ссылки на ресурсы и текстовые подсказки</p>
+                    </div>
+                </div>
+
+                {% if lesson.materials %}
+                    <div class="space-y-3">
+                        {% for mat in lesson.materials %}
+                        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-center justify-between gap-4">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0
+                                    {% if mat.material_type == 'file' %}
+                                        {% if mat.file_name and (mat.file_name.endswith('.pdf')) %}bg-rose-100 text-rose-600
+                                        {% elif mat.file_name and (mat.file_name.endswith('.doc') or mat.file_name.endswith('.docx')) %}bg-blue-100 text-blue-600
+                                        {% elif mat.file_name and (mat.file_name.endswith('.xls') or mat.file_name.endswith('.xlsx')) %}bg-emerald-100 text-emerald-600
+                                        {% else %}bg-purple-100 text-purple-600{% endif %}
+                                    {% elif mat.material_type == 'link' %}bg-cyan-100 text-cyan-600
+                                    {% else %}bg-slate-200 text-slate-700{% endif %}">
+                                    {% if mat.material_type == 'file' %}
+                                        {% if mat.file_name and mat.file_name.endswith('.pdf') %}<i class="fa-solid fa-file-pdf"></i>
+                                        {% elif mat.file_name and (mat.file_name.endswith('.doc') or mat.file_name.endswith('.docx')) %}<i class="fa-solid fa-file-word"></i>
+                                        {% elif mat.file_name and (mat.file_name.endswith('.xls') or mat.file_name.endswith('.xlsx')) %}<i class="fa-solid fa-file-excel"></i>
+                                        {% else %}<i class="fa-solid fa-file"></i>{% endif %}
+                                    {% elif mat.material_type == 'link' %}
+                                        <i class="fa-solid fa-link"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-file-lines"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900 leading-snug">{{ mat.title }}</h4>
+                                    {% if mat.description %}
+                                    <p class="text-xs text-slate-500 mt-0.5">{{ mat.description }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="flex items-center gap-2 mt-1 text-[11px]">
+                                        {% if mat.material_type == 'file' and mat.file_url %}
+                                            <a href="{{ mat.file_url }}" target="_blank" class="text-blue-600 hover:underline font-semibold flex items-center gap-1">
+                                                <i class="fa-solid fa-cloud-arrow-down"></i>
+                                                <span>{{ mat.file_name }}</span>
+                                                {% if mat.file_size %}<span class="text-slate-400">({{ mat.file_size|filesize }})</span>{% endif %}
+                                            </a>
+                                        {% elif mat.material_type == 'link' and mat.external_link %}
+                                            <a href="{{ mat.external_link }}" target="_blank" class="text-cyan-600 hover:underline font-semibold flex items-center gap-1">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                <span>{{ mat.external_link }}</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form action="/tutor/material/{{ mat.id }}/delete" method="POST" onsubmit="return confirm('Удалить этот материал?');">
+                                <button type="submit" class="text-slate-400 hover:text-rose-600 p-2 rounded-lg transition" title="Удалить">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                        Материалы еще не прикреплены. Используйте форму ниже для загрузки файлов (PDF, Word, Excel) или ссылок.
+                    </div>
+                {% endif %}
+
+                <!-- Add Material Form -->
+                <div class="pt-5 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i>
+                        <span>Добавить материал к уроку</span>
+                    </h3>
+
+                    <form action="/tutor/lesson/{{ lesson.id }}/material/add" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Тип материала</label>
+                                <select name="material_type" id="mat_type" onchange="toggleMaterialInputs()"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                                    <option value="file">Файл (PDF, Word, Excel, ZIP)</option>
+                                    <option value="link">Ссылка на внешний ресурс</option>
+                                    <option value="text">Текстовая инструкция</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Заголовок / Название</label>
+                                <input type="text" name="title" required placeholder="Например: Методичка урока (PDF)"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                            </div>
+                        </div>
+
+                        <!-- File Input (Google Drive) -->
+                        <div id="file_field_container">
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                                Выберите файл <span class="text-slate-400 font-normal">(PDF, DOCX, XLSX, ZIP, PNG, PY...)</span>
+                            </label>
+                            <input type="file" name="file"
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.png,.jpg,.jpeg,.py,.txt,.sb3"
+                                   class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200">
+                        </div>
+
+                        <!-- Link Input -->
+                        <div id="link_field_container" class="hidden">
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">URL адрес ресурса</label>
+                            <input type="url" name="external_link" placeholder="https://replit.com/... или https://github.com/..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                        </div>
+
+                        <!-- Text/Description Input -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Пояснение / Описание для резидента</label>
+                            <textarea name="description" rows="2" placeholder="Дайте пояснение к материалу..."
+                                      class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium"></textarea>
+                        </div>
+
+                        <button type="submit" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20 transition inline-flex items-center space-x-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Загрузить и прикрепить материал</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleMaterialInputs() {
+        const type = document.getElementById('mat_type').value;
+        const fileContainer = document.getElementById('file_field_container');
+        const linkContainer = document.getElementById('link_field_container');
+
+        if (type === 'file') {
+            fileContainer.classList.remove('hidden');
+            linkContainer.classList.add('hidden');
+        } else if (type === 'link') {
+            fileContainer.classList.add('hidden');
+            linkContainer.classList.remove('hidden');
+        } else {
+            fileContainer.classList.add('hidden');
+            linkContainer.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

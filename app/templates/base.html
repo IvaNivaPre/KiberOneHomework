@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KIBERone — Домашние задания{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kiber: {
+                            purple: '#6d28d9',
+                            dark: '#0f172a',
+                            neon: '#06b6d4',
+                            accent: '#8b5cf6',
+                            card: '#ffffff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-purple-500 selection:text-white">
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center space-x-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center font-black text-xl shadow-md shadow-purple-500/30 group-hover:scale-105 transition duration-200">
+                            K1
+                        </div>
+                        <div>
+                            <span class="text-xl font-black tracking-tight text-white group-hover:text-cyan-300 transition">KIBER<span class="text-cyan-400">one</span></span>
+                            <span class="block text-[10px] uppercase tracking-wider text-purple-300 font-bold -mt-1">КиберШкола будущего</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Navigation Links based on role -->
+                <nav class="hidden md:flex items-center space-x-4">
+                    {% if current_user %}
+                        {% if current_user.role in ['tutor', 'admin'] %}
+                            <a href="/tutor/dashboard" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-chart-line text-purple-400"></i>
+                                <span>Обзор</span>
+                            </a>
+                            <a href="/tutor/groups" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-layer-group text-cyan-400"></i>
+                                <span>Группы & Модули</span>
+                            </a>
+                            <a href="/tutor/students" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-user-graduate text-emerald-400"></i>
+                                <span>Ученики</span>
+                            </a>
+                            <a href="/tutor/settings" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
+                                <i class="fa-brands fa-google-drive text-amber-400"></i>
+                                <span>Google Drive</span>
+                            </a>
+                        {% else %}
+                            <a href="/student/dashboard" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-book-open text-cyan-400"></i>
+                                <span>Мои уроки & ДЗ</span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </nav>
+
+                <!-- User profile & Logout -->
+                <div class="flex items-center space-x-4">
+                    {% if current_user %}
+                        <div class="flex items-center space-x-3 bg-white/10 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-white/10">
+                            <div class="w-7 h-7 rounded-full bg-cyan-400 text-slate-900 font-bold flex items-center justify-center text-xs">
+                                {{ current_user.full_name[:1].upper() }}
+                            </div>
+                            <div class="text-left text-xs">
+                                <div class="font-bold leading-tight">{{ current_user.full_name }}</div>
+                                <div class="text-purple-300 text-[10px]">
+                                    {% if current_user.role in ['tutor', 'admin'] %}Тьютор{% else %}Резидент КиберШколы{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/logout" title="Выйти" class="text-slate-300 hover:text-white hover:bg-white/10 p-2 rounded-lg transition">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </a>
+                    {% else %}
+                        <a href="/login" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-sm transition shadow-md shadow-purple-600/30">
+                            Войти в систему
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center space-x-2">
+                <span class="font-bold text-slate-700">KIBERone</span>
+                <span>• Международная КиберШкола для детей</span>
+            </div>
+            <div class="flex items-center space-x-4 text-xs">
+                <span class="flex items-center text-slate-600">
+                    <i class="fa-brands fa-google-drive mr-1.5 text-blue-500"></i> Облачное хранилище: Google Drive
+                </span>
+                <span>FastAPI + SQLite</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

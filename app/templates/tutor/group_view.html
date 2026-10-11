@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }} — Модули и Уроки{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+                <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+                <span>/</span>
+                <a href="/tutor/groups" class="hover:text-purple-600 transition">Группы</a>
+                <span>/</span>
+                <span class="text-slate-600 font-bold">{{ group.name }}</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </span>
+                <span>{{ group.name }}</span>
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">{{ group.description or 'Управление учебной программой, модулями и уроками' }}</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="/tutor/group/{{ group.id }}/matrix" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center space-x-2">
+                <i class="fa-solid fa-traffic-light"></i>
+                <span>Светофор сдачи ДЗ</span>
+            </a>
+            <button onclick="document.getElementById('add-module-modal').classList.remove('hidden')" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition flex items-center space-x-2 shadow-md shadow-purple-600/20">
+                <i class="fa-solid fa-plus"></i>
+                <span>Добавить Модуль</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modules Accordion / List -->
+    <div class="space-y-6">
+        {% if group.modules %}
+            {% for mod in group.modules %}
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                
+                <!-- Module Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-100 text-cyan-800 uppercase tracking-wider">
+                                Модуль {{ loop.index }}
+                            </span>
+                            <span class="text-xs text-slate-400">• {{ mod.lessons|length }} уроков</span>
+                        </div>
+                        <h2 class="text-xl font-black text-slate-900">{{ mod.title }}</h2>
+                        {% if mod.description %}
+                        <p class="text-xs text-slate-500">{{ mod.description }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <button onclick="openAddLessonModal('{{ mod.id }}', '{{ mod.title }}')"
+                                class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs rounded-xl transition border border-purple-200 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Добавить урок</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lessons in Module -->
+                {% if mod.lessons %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for lesson in mod.lessons %}
+                        <div class="p-4 rounded-2xl border border-slate-200 hover:border-purple-300 bg-slate-50/50 hover:bg-white hover:shadow-md transition flex flex-col justify-between space-y-3">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-md">
+                                        Урок {{ lesson.order or loop.index }}
+                                    </span>
+                                    {% if lesson.deadline %}
+                                        <span class="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                                            <i class="fa-regular fa-clock text-amber-500"></i>
+                                            <span>{{ lesson.deadline.strftime('%d.%m.%Y %H:%M') }}</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="text-[11px] text-slate-400">Без дедлайна</span>
+                                    {% endif %}
+                                </div>
+                                <h3 class="text-base font-bold text-slate-900 leading-snug">{{ lesson.title }}</h3>
+                                {% if lesson.description %}
+                                <p class="text-xs text-slate-500 line-clamp-2">{{ lesson.description }}</p>
+                                {% endif %}
+
+                                <div class="flex flex-wrap gap-1.5 pt-1">
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                                        <i class="fa-solid fa-paperclip text-[9px] mr-1"></i>{{ lesson.materials|length }} материалов
+                                    </span>
+                                    {% if lesson.quiz %}
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 font-semibold">
+                                        <i class="fa-solid fa-circle-question text-[9px] mr-1"></i>Тест ({{ lesson.quiz.questions|length }} вопр.)
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2">
+                                <a href="/tutor/lesson/{{ lesson.id }}" class="flex-1 py-1.5 px-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-lg text-center transition">
+                                    Материалы и ДЗ
+                                </a>
+                                <a href="/tutor/lesson/{{ lesson.id }}/quiz" class="py-1.5 px-3 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs rounded-lg transition border border-cyan-200" title="Конструктор теста">
+                                    <i class="fa-solid fa-file-circle-question"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-6 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                        В этом модуле еще нет уроков. Нажмите «Добавить урок» выше.
+                    </div>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center space-y-4">
+                <i class="fa-solid fa-layer-group text-4xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-800">В этой группе пока нет модулей</h3>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                    Разделите учебный курс на логические модули (например, «Основы Python», «Разработка 2D игр на Pygame»)
+                </p>
+                <button onclick="document.getElementById('add-module-modal').classList.remove('hidden')" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20 inline-flex items-center space-x-1.5">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Добавить первый модуль</span>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Add Module Modal -->
+<div id="add-module-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-900">Новый учебный модуль</h3>
+            <button onclick="document.getElementById('add-module-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form action="/tutor/group/{{ group.id }}/module/add" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Название модуля</label>
+                <input type="text" name="title" required placeholder="Например: Модуль 1. Основы Python"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Описание (необязательно)</label>
+                <textarea name="description" rows="3" placeholder="Чему научатся дети в этом модуле..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button type="button" onclick="document.getElementById('add-module-modal').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-semibold text-xs hover:bg-slate-100 rounded-xl">Отмена</button>
+                <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20">Создать модуль</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Lesson Modal -->
+<div id="add-lesson-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-900">Новый урок в модуль</h3>
+            <button onclick="document.getElementById('add-lesson-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form id="add-lesson-form" action="" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Название урока</label>
+                <input type="text" name="title" required placeholder="Например: Урок 1. Переменные и ввод данных"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Описание / Задание к уроку</label>
+                <textarea name="description" rows="3" placeholder="Что делаем на уроке и суть домашнего задания..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Дедлайн выполнения ДЗ</label>
+                <input type="datetime-local" name="deadline"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button type="button" onclick="document.getElementById('add-lesson-modal').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-semibold text-xs hover:bg-slate-100 rounded-xl">Отмена</button>
+                <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20">Создать урок</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openAddLessonModal(modId, modTitle) {
+        const form = document.getElementById('add-lesson-form');
+        form.action = `/tutor/module/${modId}/lesson/add`;
+        document.getElementById('add-lesson-modal').classList.remove('hidden');
+    }
+</script>
+{% endblock %}

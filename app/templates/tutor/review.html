@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Проверка ДЗ — {{ submission.student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+
+    <!-- Header & Navigation -->
+    <div>
+        <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+            <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+            <span>/</span>
+            <a href="/tutor/group/{{ submission.lesson.module.group.id }}/matrix" class="hover:text-purple-600 transition">Светофор группы</a>
+            <span>/</span>
+            <span class="text-slate-600 font-bold">Проверка работы</span>
+        </div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </span>
+            <span>Проверка домашнего задания</span>
+        </h1>
+    </div>
+
+    <!-- Student & Lesson Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-400 text-white font-black flex items-center justify-center text-base shadow-md shadow-purple-500/20">
+                    {{ submission.student.full_name[:1] }}
+                </div>
+                <div>
+                    <h2 class="text-xl font-black text-slate-900">{{ submission.student.full_name }}</h2>
+                    <div class="text-xs text-slate-400 font-medium">
+                        Группа: <span class="font-bold text-slate-700">{{ submission.lesson.module.group.name }}</span> • Логин: @{{ submission.student.username }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-left sm:text-right text-xs">
+                <div class="text-slate-400 font-semibold">Дата сдачи:</div>
+                <div class="font-bold text-slate-700">{{ submission.submitted_at|datetime }}</div>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-purple-600">Тема урока:</div>
+            <h3 class="text-lg font-bold text-slate-900">{{ submission.lesson.title }}</h3>
+            {% if submission.lesson.description %}
+            <p class="text-xs text-slate-500">{{ submission.lesson.description }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Student Submission Content -->
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 space-y-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                <i class="fa-solid fa-inbox text-purple-600"></i>
+                <span>Присланный ответ ученика</span>
+            </h4>
+
+            <!-- File attachment -->
+            {% if submission.file_url %}
+            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm text-slate-900">{{ submission.file_name or 'Прикрепленный файл' }}</div>
+                        <div class="text-[11px] text-slate-400">
+                            {% if submission.file_size %}{{ submission.file_size|filesize }} • {% endif %}
+                            Хранилище: {% if submission.gdrive_file_id %}Google Drive{% else %}Локальный сервер{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ submission.file_url }}" target="_blank"
+                   class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                    <span>Открыть / Скачать</span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Text answer / code -->
+            {% if submission.text_answer %}
+            <div class="space-y-1.5">
+                <div class="text-xs font-bold text-slate-700">Текстовый ответ / код:</div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 whitespace-pre-wrap">
+{{ submission.text_answer }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if not submission.file_url and not submission.text_answer %}
+            <div class="text-xs text-slate-400 italic">
+                Ученик не прикрепил файл или текст.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Grading & Feedback Form -->
+        <form action="/tutor/submission/{{ submission.id }}/grade" method="POST" class="pt-4 border-t border-slate-100 space-y-5">
+            <h4 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-stamp text-emerald-600"></i>
+                <span>Оценка и рецензия тьютора</span>
+            </h4>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Оценка / Балл</label>
+                    <input type="text" name="grade" value="{{ submission.grade or '5 (Отлично!)' }}" required
+                           placeholder="Например: 5+, 100%, Зачтено"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Статус проверки</label>
+                    <select name="status_choice" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-semibold">
+                        <option value="reviewed" {% if submission.status == 'reviewed' %}selected{% endif %}>
+                            🟢 Принято / Проверено (Загорается зеленая галочка)
+                        </option>
+                        <option value="needs_revision" {% if submission.status == 'needs_revision' %}selected{% endif %}>
+                            🟠 Требует доработки (Отправить ученику на исправление)
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Комментарий / Обратная связь тьютора</label>
+                <textarea name="tutor_comment" rows="4" placeholder="Похвалите ребенка за сильные стороны, укажите, как оптимизировать алгоритм..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">{{ submission.tutor_comment or '' }}</textarea>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <a href="/tutor/group/{{ submission.lesson.module.group.id }}/matrix" class="px-4 py-2 text-slate-500 font-semibold text-xs hover:bg-slate-100 rounded-xl transition">
+                    Отмена
+                </a>
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Сохранить оценку (Зажечь зеленую галочку)</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

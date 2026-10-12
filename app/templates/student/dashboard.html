@@ -16,7 +16,7 @@
                 <span>Твой личный кабинет</span>
             </div>
             <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white">
-                Привет, {{ current_user.full_name }}! 👋
+                Привет, {{ current_user.full_name }}!
             </h1>
             <p class="text-slate-300 text-sm max-w-xl">
                 {% if group %}
@@ -132,7 +132,7 @@
                     <div class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl font-black shadow-md shadow-emerald-500/20">
                         <i class="fa-solid fa-trophy"></i>
                     </div>
-                    <h3 class="text-xl font-black text-slate-900">Все задания выполнены! 🎉</h3>
+                    <h3 class="text-xl font-black text-slate-900">Все задания выполнены!</h3>
                     <p class="text-sm text-slate-500 max-w-md mx-auto">
                         Ты выполнил все доступные домашние задания. Новые уроки появятся после следующего занятия!
                     </p>
@@ -156,7 +156,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-900 flex items-center gap-1.5 border border-emerald-200">
                                     <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
-                                    <span>ВЫПОЛНЕНО ✓</span>
+                                    <span>ВЫПОЛНЕНО</span>
                                 </span>
 
                                 {% if item.submission and item.submission.grade %}

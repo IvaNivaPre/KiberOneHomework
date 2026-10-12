@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Управление преподавателями — KIBERone{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-6xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
+                <a href="/admin/dashboard" class="hover:text-[#13c9ba] transition">Панель управления</a>
+                <span>/</span>
+                <span class="text-slate-600 font-bold">Преподаватели</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                </span>
+                <span>Преподавательский состав (Тьюторы)</span>
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Создание и управление учетными записями преподавателей KIBERone.
+            </p>
+        </div>
+
+        <div>
+            <button onclick="openAddTutorModal()"
+                    class="px-5 py-2.5 bg-[#13c9ba] hover:bg-[#0fa89b] text-slate-950 font-black text-xs rounded-2xl shadow-md transition flex items-center space-x-2">
+                <i class="fa-solid fa-plus text-base"></i>
+                <span>Добавить преподавателя</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if message %}
+        {% if message == 'tutor_added' %}
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span>Преподаватель успешно добавлен! Он может входить по своему логину и паролю.</span>
+        </div>
+        {% elif message == 'tutor_updated' %}
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span>Данные преподавателя успешно обновлены!</span>
+        </div>
+        {% elif message == 'tutor_deleted' %}
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-trash-can text-amber-600 text-base"></i>
+            <span>Преподаватель удален из системы.</span>
+        </div>
+        {% elif message == 'error_username_exists' %}
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+            <span>Ошибка: Преподаватель с таким логином уже существует! Придумайте другой логин.</span>
+        </div>
+        {% elif message == 'error_cannot_delete_self' %}
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+            <span>Вы не можете удалить свою собственную учетную запись администратора.</span>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Tutors Table Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-users text-[#13c9ba]"></i>
+                    <span>Список преподавателей ({{ tutors|length }})</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Преподаватели имеют доступ к проверке домашних заданий, созданию уроков, модулей и тестов.
+                </p>
+            </div>
+        </div>
+
+        {% if tutors %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-100">
+                        <th class="pb-3 font-black">ФИО Преподавателя</th>
+                        <th class="pb-3 font-black">Логин</th>
+                        <th class="pb-3 font-black">Пароль для входа</th>
+                        <th class="pb-3 font-black">Роль</th>
+                        <th class="pb-3 font-black">Дата добавления</th>
+                        <th class="pb-3 font-black text-right">Действия</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for t in tutors %}
+                    <tr class="hover:bg-slate-50/70 transition">
+                        <td class="py-4 pr-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 rounded-xl bg-[#13c9ba] text-slate-950 font-black flex items-center justify-center text-sm shadow-sm">
+                                    {{ t.full_name[:1] }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-900 text-sm">{{ t.full_name }}</div>
+                                    <div class="text-[11px] text-slate-500 flex flex-wrap gap-2 mt-0.5">
+                                        {% if t.telegram %}
+                                            <span class="text-sky-600"><i class="fa-brands fa-telegram"></i> {{ t.telegram }}</span>
+                                        {% endif %}
+                                        {% if t.phone %}
+                                            <span class="text-emerald-600"><i class="fa-solid fa-phone"></i> {{ t.phone }}</span>
+                                        {% endif %}
+                                        {% if t.email %}
+                                            <span class="text-slate-500"><i class="fa-solid fa-envelope"></i> {{ t.email }}</span>
+                                        {% endif %}
+                                        {% if not t.telegram and not t.phone and not t.email %}
+                                            <span class="text-slate-400 italic">Контакты не указаны</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 pr-3 font-mono font-bold text-slate-700">
+                            @{{ t.username }}
+                        </td>
+                        <td class="py-4 pr-3">
+                            {% if t.plain_password %}
+                                <span class="px-2.5 py-1 bg-slate-100 rounded-lg font-mono font-bold text-slate-800 text-[11px] select-all">
+                                    {{ t.plain_password }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400 italic">Скрыт (захеширован)</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 pr-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800">
+                                Тьютор
+                            </span>
+                        </td>
+                        <td class="py-4 pr-3 text-slate-400 text-[11px]">
+                            {{ t.created_at|datetime("%d.%m.%Y") if t.created_at else '—' }}
+                        </td>
+                        <td class="py-4 text-right space-x-2">
+                            <!-- Edit Button -->
+                            <button onclick="openEditTutorModal('{{ t.id }}', '{{ t.full_name|replace("'", "\\'") }}', '{{ t.username|replace("'", "\\'") }}', '{{ (t.phone or '')|replace("'", "\\'") }}', '{{ (t.telegram or '')|replace("'", "\\'") }}', '{{ (t.email or '')|replace("'", "\\'") }}', '{{ (t.whatsapp or '')|replace("'", "\\'") }}', '{{ (t.max_link or '')|replace("'", "\\'") }}')"
+                                    class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold transition inline-flex items-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-pen text-[10px]"></i>
+                                <span>Изменить</span>
+                            </button>
+
+                            <!-- Delete Form -->
+                            <form action="/admin/tutors/{{ t.id }}/delete" method="POST" class="inline"
+                                  onsubmit="return confirm('Вы уверены, что хотите удалить преподавателя {{ t.full_name }}?');">
+                                <button type="submit"
+                                        class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-bold transition inline-flex items-center gap-1 cursor-pointer">
+                                    <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                    <span>Удалить</span>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-10 text-slate-400 text-xs">
+            <i class="fa-solid fa-chalkboard-user text-3xl mb-2 text-slate-300 block"></i>
+            <span>Пока нет добавленных преподавателей. Нажмите кнопку выше, чтобы добавить первого!</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Administrators Section -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
+        <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-[#f7c90e]"></i>
+            <span>Администраторы системы</span>
+        </h3>
+        <p class="text-xs text-slate-500">
+            Учетные записи с полными правами доступа ко всем настройкам, преподавателям, группам и Google Drive.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            {% for a in admins %}
+            <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#f7c90e] text-slate-950 font-black flex items-center justify-center text-sm shadow-sm">
+                        <i class="fa-solid fa-crown text-slate-950"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">{{ a.full_name }}</div>
+                        <div class="text-[11px] text-slate-500 font-mono">Логин: @{{ a.username }}</div>
+                    </div>
+                </div>
+
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-200 text-amber-950">
+                    Главный администратор
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Add Tutor Modal -->
+<div id="add-tutor-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 relative animate-scale-up max-h-[90vh] overflow-y-auto">
+        <button onclick="closeAddTutorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-2 rounded-xl cursor-pointer">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="space-y-1">
+            <div class="w-12 h-12 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] flex items-center justify-center text-xl font-black">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-900 pt-1">Добавить преподавателя</h3>
+            <p class="text-xs text-slate-500">
+                Создайте учетную запись и укажите контактные данные тьютора KIBERone.
+            </p>
+        </div>
+
+        <form action="/admin/tutors/add" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">ФИО Преподавателя</label>
+                <input type="text" name="full_name" required placeholder="Например: Анна Михайловна"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Логин для входа</label>
+                    <input type="text" name="username" required placeholder="anna_tutor"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Пароль для входа</label>
+                    <input type="text" name="password" required placeholder="Введите пароль"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium font-mono">
+                </div>
+            </div>
+
+            <!-- Contacts Section -->
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+                <div class="text-[11px] font-black uppercase text-slate-700 tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-address-book text-[#13c9ba]"></i>
+                    <span>Контакты преподавателя (видны его ученикам)</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-brands fa-telegram text-sky-500 mr-1"></i> Telegram
+                        </label>
+                        <input type="text" name="telegram" placeholder="https://t.me/tutor"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-solid fa-phone text-emerald-500 mr-1"></i> Телефон / WhatsApp
+                        </label>
+                        <input type="text" name="phone" placeholder="+7 (999) 000-00-00"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-solid fa-envelope text-slate-400 mr-1"></i> Email
+                        </label>
+                        <input type="email" name="email" placeholder="tutor@kiber-one.com"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-solid fa-robot text-[#f7c90e] mr-1"></i> MAX / Чат школы
+                        </label>
+                        <input type="text" name="max_link" placeholder="https://max.kiber-one.com"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-[#13c9ba] hover:bg-[#0fa89b] text-slate-950 font-black text-xs rounded-xl transition shadow-md flex items-center justify-center space-x-2 cursor-pointer">
+                <i class="fa-solid fa-check"></i>
+                <span>Зарегистрировать преподавателя</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Tutor Modal -->
+<div id="edit-tutor-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 relative animate-scale-up max-h-[90vh] overflow-y-auto">
+        <button onclick="closeEditTutorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-2 rounded-xl cursor-pointer">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="space-y-1">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-xl font-black">
+                <i class="fa-solid fa-pen"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-900 pt-1">Редактировать преподавателя</h3>
+            <p class="text-xs text-slate-500">
+                Изменение ФИО, сброс пароля и контакты преподавателя.
+            </p>
+        </div>
+
+        <form id="edit-tutor-form" method="POST" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Логин (не изменяется)</label>
+                    <input type="text" id="edit-username" disabled
+                           class="w-full px-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-medium font-mono text-slate-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">ФИО Преподавателя</label>
+                    <input type="text" name="full_name" id="edit-fullname" required
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Новый пароль (оставьте пустым, чтобы не менять)</label>
+                <input type="text" name="password" placeholder="Оставьте пустым или введите новый пароль"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium font-mono">
+            </div>
+
+            <!-- Contacts Section -->
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+                <div class="text-[11px] font-black uppercase text-slate-700 tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-address-book text-[#13c9ba]"></i>
+                    <span>Контакты преподавателя</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-brands fa-telegram text-sky-500 mr-1"></i> Telegram
+                        </label>
+                        <input type="text" name="telegram" id="edit-telegram" placeholder="https://t.me/tutor"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-solid fa-phone text-emerald-500 mr-1"></i> Телефон / WhatsApp
+                        </label>
+                        <input type="text" name="phone" id="edit-phone" placeholder="+7 (999) 000-00-00"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-solid fa-envelope text-slate-400 mr-1"></i> Email
+                        </label>
+                        <input type="email" name="email" id="edit-email" placeholder="tutor@kiber-one.com"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                            <i class="fa-solid fa-robot text-[#f7c90e] mr-1"></i> MAX / Чат школы
+                        </label>
+                        <input type="text" name="max_link" id="edit-max-link" placeholder="https://max.kiber-one.com"
+                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-xs rounded-xl transition shadow-md flex items-center justify-center space-x-2 cursor-pointer">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Сохранить изменения</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openAddTutorModal() {
+    document.getElementById('add-tutor-modal').classList.remove('hidden');
+}
+function closeAddTutorModal() {
+    document.getElementById('add-tutor-modal').classList.add('hidden');
+}
+
+function openEditTutorModal(id, fullName, username, phone, telegram, email, whatsapp, maxLink) {
+    document.getElementById('edit-tutor-form').action = `/admin/tutors/${id}/edit`;
+    document.getElementById('edit-fullname').value = fullName || '';
+    document.getElementById('edit-username').value = '@' + username;
+    document.getElementById('edit-phone').value = phone || '';
+    document.getElementById('edit-telegram').value = telegram || '';
+    document.getElementById('edit-email').value = email || '';
+    document.getElementById('edit-max-link').value = maxLink || '';
+    document.getElementById('edit-tutor-modal').classList.remove('hidden');
+}
+function closeEditTutorModal() {
+    document.getElementById('edit-tutor-modal').classList.add('hidden');
+}
+</script>
+{% endblock %}

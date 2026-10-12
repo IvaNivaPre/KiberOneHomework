@@ -104,7 +104,7 @@
                         {% for cell in row.cells %}
                         <td class="p-3 text-center border-r border-slate-100">
                             {% if cell.status_type == 'reviewed' %}
-                                <!-- 🟢 GREEN CHECKMARK: Reviewed & Graded -->
+                                <!-- GREEN CHECKMARK: Reviewed & Graded -->
                                 <a href="/tutor/submission/{{ cell.submission.id }}"
                                    class="group inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition shadow-sm hover:scale-102"
                                    title="Проверено! Нажмите для просмотра деталей">
@@ -118,7 +118,7 @@
                                 </a>
 
                             {% elif cell.status_type == 'quiz_passed' %}
-                                <!-- 🟢 GREEN CHECKMARK: Quiz Passed -->
+                                <!-- GREEN CHECKMARK: Quiz Passed -->
                                 <div class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300">
                                     <div class="flex items-center space-x-1 font-black text-xs">
                                         <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
@@ -130,7 +130,7 @@
                                 </div>
 
                             {% elif cell.status_type == 'submitted' %}
-                                <!-- 🟡 YELLOW BADGE: Submitted, waiting for tutor review -->
+                                <!-- YELLOW BADGE: Submitted, waiting for tutor review -->
                                 <a href="/tutor/submission/{{ cell.submission.id }}"
                                    class="group inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition shadow-sm hover:scale-102 animate-pulse"
                                    title="Новая работа! Нажмите для проверки">
@@ -145,7 +145,7 @@
                                 </a>
 
                             {% elif cell.status_type == 'revision' %}
-                                <!-- 🟠 ORANGE BADGE: Needs revision -->
+                                <!-- ORANGE BADGE: Needs revision -->
                                 <a href="/tutor/submission/{{ cell.submission.id }}"
                                    class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-300 transition">
                                     <div class="flex items-center space-x-1 font-bold text-xs">
@@ -156,7 +156,7 @@
                                 </a>
 
                             {% elif cell.status_type == 'overdue' %}
-                                <!-- 🔴 RED CROSSMARK: Overdue -->
+                                <!-- RED CROSSMARK: Overdue -->
                                 <div class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-300">
                                     <div class="flex items-center space-x-1 font-black text-xs">
                                         <i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>
@@ -166,7 +166,7 @@
                                 </div>
 
                             {% else %}
-                                <!-- 🔴 RED / GREY MARKER: Not started / missing -->
+                                <!-- RED / GREY MARKER: Not started / missing -->
                                 <div class="inline-flex flex-col items-center justify-center w-full py-2 px-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200">
                                     <div class="flex items-center space-x-1 font-bold text-xs text-rose-500">
                                         <i class="fa-solid fa-xmark text-base"></i>

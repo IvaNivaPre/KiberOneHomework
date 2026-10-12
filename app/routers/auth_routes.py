@@ -18,7 +18,9 @@ def index_redirect(request: Request, db: Session = Depends(get_db)):
     user = get_current_user_optional(request, db)
     if not user:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    if user.role in ["tutor", "admin"]:
+    if user.role == "admin":
+        return RedirectResponse(url="/admin/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+    elif user.role == "tutor":
         return RedirectResponse(url="/tutor/dashboard", status_code=status.HTTP_303_SEE_OTHER)
     return RedirectResponse(url="/student/dashboard", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -27,7 +29,9 @@ def index_redirect(request: Request, db: Session = Depends(get_db)):
 def login_page(request: Request, db: Session = Depends(get_db)):
     user = get_current_user_optional(request, db)
     if user:
-        if user.role in ["tutor", "admin"]:
+        if user.role == "admin":
+            return RedirectResponse(url="/admin/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+        elif user.role == "tutor":
             return RedirectResponse(url="/tutor/dashboard", status_code=status.HTTP_303_SEE_OTHER)
         return RedirectResponse(url="/student/dashboard", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(
@@ -60,7 +64,12 @@ def login_post(
     token = create_access_token(user.id, user.username, user.role)
 
     # Choose destination
-    redirect_url = "/tutor/dashboard" if user.role in ["tutor", "admin"] else "/student/dashboard"
+    if user.role == "admin":
+        redirect_url = "/admin/dashboard"
+    elif user.role == "tutor":
+        redirect_url = "/tutor/dashboard"
+    else:
+        redirect_url = "/student/dashboard"
     redirect_res = RedirectResponse(url=redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     redirect_res.set_cookie(
         key=COOKIE_NAME,

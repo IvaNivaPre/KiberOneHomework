@@ -6,14 +6,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
 from app.config import BASE_DIR, UPLOAD_DIR, TUTOR_CONTACTS
-from app.database import engine, Base
-from app.routers import auth_routes, tutor_routes, student_routes
+from app.database import engine, Base, SessionLocal
+from app.routers import auth_routes, tutor_routes, student_routes, admin_routes
 
 # Initialize DB tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="KiberOne - Платформа домашних заданий",
+    title="KiberOne",
     description="Система сдачи, хранения (Google Drive) и проверки ДЗ для KiberOne",
     version="1.0.0"
 )
@@ -28,6 +28,7 @@ app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # Include Routers
 app.include_router(auth_routes.router)
+app.include_router(admin_routes.router)
 app.include_router(tutor_routes.router)
 app.include_router(student_routes.router)
 
@@ -54,7 +55,7 @@ def format_deadline_badge(dl: datetime) -> str:
 
 def format_filesize(num_bytes: int) -> str:
     if not num_bytes:
-        return ""
+        return "0 Б"
     for unit in ['Б', 'КБ', 'МБ', 'ГБ']:
         if abs(num_bytes) < 1024.0:
             return f"{num_bytes:3.1f} {unit}"
@@ -68,6 +69,9 @@ templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS
 
 auth_routes.templates.env.filters.update(templates.env.filters)
 auth_routes.templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS
+
+admin_routes.templates.env.filters.update(templates.env.filters)
+admin_routes.templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS
 
 tutor_routes.templates.env.filters.update(templates.env.filters)
 tutor_routes.templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS

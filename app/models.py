@@ -11,14 +11,22 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
-    plain_password = Column(String(100), nullable=True)  # Helper for tutors to easily share/remind login info with kids
+    plain_password = Column(String(100), nullable=True)  # Helper for admin/tutors to share login info with kids
     full_name = Column(String(100), nullable=False)
     role = Column(String(20), default="student", nullable=False)  # 'admin', 'tutor', 'student'
     group_id = Column(Integer, ForeignKey("groups.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Contact information (individual for each tutor)
+    telegram = Column(String(150), nullable=True)
+    telegram_handle = Column(String(100), nullable=True)
+    phone = Column(String(50), nullable=True)
+    email = Column(String(100), nullable=True)
+    whatsapp = Column(String(150), nullable=True)
+    max_link = Column(String(200), nullable=True)
+
     # Relationships
-    group = relationship("Group", back_populates="students")
+    group = relationship("Group", back_populates="students", foreign_keys=[group_id])
     submissions = relationship("Submission", back_populates="student", cascade="all, delete-orphan")
     quiz_results = relationship("QuizResult", back_populates="student", cascade="all, delete-orphan")
 
@@ -29,10 +37,12 @@ class Group(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
+    tutor_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    students = relationship("User", back_populates="group")
+    tutor = relationship("User", foreign_keys=[tutor_id], backref="assigned_groups")
+    students = relationship("User", back_populates="group", foreign_keys="User.group_id")
     modules = relationship("Module", back_populates="group", cascade="all, delete-orphan", order_by="Module.order")
 
 

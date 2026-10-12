@@ -1,0 +1,26 @@
+{
+  "cache": {
+    "2c01d859725679d6865323b24724a810": {
+      "storage_type": "gdrive",
+      "file_id": "1TxakSFcoH9DSnqgiQbMzZEhDVAgD532F",
+      "file_name": "my_homework_project.py",
+      "file_size": 59,
+      "file_url": "https://drive.google.com/file/d/1TxakSFcoH9DSnqgiQbMzZEhDVAgD532F/view?usp=drivesdk",
+      "download_url": "https://drive.google.com/uc?id=1TxakSFcoH9DSnqgiQbMzZEhDVAgD532F&export=download",
+      "deduplicated": false
+    },
+    "ef627124521a377593147c8376bbe863": {
+      "storage_type": "gdrive",
+      "file_id": "1uCG44_K_HdhMb-YVQWXSHsM1OXue0-vs",
+      "file_name": "sample_project.py",
+      "file_size": 71,
+      "file_url": "https://drive.google.com/file/d/1uCG44_K_HdhMb-YVQWXSHsM1OXue0-vs/view?usp=drivesdk",
+      "download_url": "https://drive.google.com/uc?id=1uCG44_K_HdhMb-YVQWXSHsM1OXue0-vs&export=download",
+      "deduplicated": false
+    }
+  },
+  "stats": {
+    "files_deduplicated": 2,
+    "bytes_saved": 130
+  }
+}

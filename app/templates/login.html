@@ -28,13 +28,13 @@
         <!-- Form -->
         <form action="/login" method="POST" class="space-y-5">
             <div>
-                <label for="username" class="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Логин ученика / тьютора</label>
+                <label for="username" class="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Логин</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-user"></i>
                     </div>
                     <input type="text" id="username" name="username" value="{{ username or '' }}" required autofocus
-                           placeholder="Например: student1 или tutor"
+                           placeholder="Введите логин"
                            class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] focus:border-transparent text-sm font-medium transition">
                 </div>
             </div>
@@ -58,36 +58,6 @@
             </button>
         </form>
 
-        <!-- Quick Demo Credentials Box -->
-        <div class="mt-8 pt-6 border-t border-slate-100">
-            <div class="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-3 text-center">
-                Быстрый вход для проверки (Демо)
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <button type="button" onclick="fillCreds('tutor', 'kiber2026')"
-                        class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#13c9ba]/10 hover:border-[#13c9ba] text-slate-900 font-semibold text-left transition flex flex-col cursor-pointer">
-                    <span class="text-[10px] text-[#13c9ba] font-black uppercase">Тьютор</span>
-                    <span class="font-bold">login: tutor</span>
-                    <span class="text-slate-500 font-normal">pass: kiber2026</span>
-                </button>
-                <button type="button" onclick="fillCreds('student1', 'student123')"
-                        class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#f7c90e]/20 hover:border-[#f7c90e] text-slate-900 font-semibold text-left transition flex flex-col cursor-pointer">
-                    <span class="text-[10px] text-amber-600 font-black uppercase">Ученик</span>
-                    <span class="font-bold">login: student1</span>
-                    <span class="text-slate-500 font-normal">pass: student123</span>
-                </button>
-            </div>
-        </div>
-
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    function fillCreds(u, p) {
-        document.getElementById('username').value = u;
-        document.getElementById('password').value = p;
-    }
-</script>
 {% endblock %}

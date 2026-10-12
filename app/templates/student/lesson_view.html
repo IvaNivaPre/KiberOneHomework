@@ -167,10 +167,10 @@
             <div>
                 {% if submission %}
                     {% if submission.status == 'reviewed' %}
-                        <!-- 🟢 ЗЕЛЕНАЯ ГАЛОЧКА: Проверено -->
+                        <!-- ЗЕЛЕНАЯ ГАЛОЧКА: Проверено -->
                         <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-black shadow-sm">
                             <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                            <span>ЗАЧТЕНО (ЗЕЛЕНАЯ ГАЛОЧКА ✓)</span>
+                            <span>ЗАЧТЕНО (ЗЕЛЕНАЯ ГАЛОЧКА)</span>
                         </div>
                     {% elif submission.status == 'needs_revision' %}
                         <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-orange-900 border border-orange-300 text-xs font-black">
@@ -178,17 +178,17 @@
                             <span>Нужно доработать</span>
                         </div>
                     {% else %}
-                        <!-- 🟡 ЖЕЛТЫЙ: На проверке -->
+                        <!-- ЖЕЛТЫЙ: На проверке -->
                         <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black">
                             <i class="fa-solid fa-clock text-amber-600"></i>
                             <span>Сдано (преподаватель проверяет)</span>
                         </div>
                     {% endif %}
                 {% else %}
-                    <!-- 🔴 КРАСНЫЙ МАРКЕР: Не сдано -->
+                    <!-- КРАСНЫЙ МАРКЕР: Не сдано -->
                     <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 text-xs font-black">
                         <i class="fa-solid fa-circle-xmark text-rose-600 text-sm"></i>
-                        <span>Не сдано (Красный статус ✕)</span>
+                        <span>Не сдано (Красный статус)</span>
                     </div>
                 {% endif %}
             </div>
@@ -241,14 +241,14 @@
             <!-- File upload field with simple hints -->
             <div>
                 <label class="block text-xs font-black uppercase text-slate-700 mb-1.5">
-                    📁 1. Прикрепи файл со своей работой
+                    1. Прикрепи файл со своей работой
                 </label>
                 <div class="border-2 border-dashed border-slate-200 hover:border-[#13c9ba] rounded-3xl p-5 transition bg-slate-50/60">
                     <input type="file" name="file"
                            accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.png,.jpg,.jpeg,.py,.txt,.sb3"
                            class="w-full text-xs text-slate-600 file:mr-4 file:py-3 file:px-5 file:rounded-2xl file:border-0 file:text-xs file:font-black file:bg-[#13c9ba] file:text-slate-950 hover:file:bg-[#0fa89b] cursor-pointer">
                     <p class="text-xs text-slate-500 font-medium mt-2.5">
-                        💡 <strong>Подсказка:</strong> можно прикрепить картинку (скриншот), проект Scratch (.sb3), файл презентации, документ или программу. Файл сохранится на Google Диске школы.
+                        <strong>Подсказка:</strong> можно прикрепить картинку (скриншот), проект Scratch (.sb3), файл презентации, документ или программу. Файл сохранится на Google Диске школы.
                     </p>
                 </div>
             </div>
@@ -256,7 +256,7 @@
             <!-- Text answer field with simple hints -->
             <div>
                 <label class="block text-xs font-black uppercase text-slate-700 mb-1.5">
-                    💬 2. Напиши сообщение или ответ своими словами
+                    2. Напиши сообщение или ответ своими словами
                 </label>
                 <textarea name="text_answer" rows="3"
                           placeholder="Например: «Здравствуйте! Я сделал задание, всё получилось без ошибок. Посмотрите, пожалуйста!» или скопируй сюда текст ответа..."

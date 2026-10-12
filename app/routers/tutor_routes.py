@@ -50,10 +50,11 @@ def tutor_dashboard(request: Request, db: Session = Depends(get_db), current_use
 @router.get("/groups", response_class=HTMLResponse)
 def tutor_groups(request: Request, db: Session = Depends(get_db), current_user: User = Depends(require_tutor)):
     groups = db.query(Group).all()
+    tutors = db.query(User).filter(User.role.in_(["tutor", "admin"])).order_by(User.full_name).all()
     return templates.TemplateResponse(
         request=request,
         name="tutor/groups.html",
-        context={"current_user": current_user, "groups": groups}
+        context={"current_user": current_user, "groups": groups, "tutors": tutors}
     )
 
 
@@ -61,14 +62,35 @@ def tutor_groups(request: Request, db: Session = Depends(get_db), current_user: 
 def tutor_add_group(
     name: str = Form(...),
     description: str = Form(""),
+    tutor_id: Optional[int] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tutor)
 ):
-    group = Group(name=name.strip(), description=description.strip())
+    tid = tutor_id if tutor_id and tutor_id > 0 else (current_user.id if current_user.role == "tutor" else None)
+    group = Group(name=name.strip(), description=description.strip(), tutor_id=tid)
     db.add(group)
     db.commit()
     db.refresh(group)
     return RedirectResponse(url=f"/tutor/group/{group.id}", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/groups/{group_id}/edit")
+def tutor_edit_group(
+    group_id: int,
+    name: str = Form(...),
+    description: str = Form(""),
+    tutor_id: Optional[int] = Form(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_tutor)
+):
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Группа не найдена")
+    group.name = name.strip()
+    group.description = description.strip()
+    group.tutor_id = tutor_id if tutor_id and tutor_id > 0 else None
+    db.commit()
+    return RedirectResponse(url="/tutor/groups", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/group/{group_id}", response_class=HTMLResponse)
@@ -130,18 +152,18 @@ def tutor_group_matrix(group_id: int, request: Request, db: Session = Depends(ge
             # red: not submitted and deadline passed (or active deadline)
             if sub:
                 if sub.status == "reviewed":
-                    status_type = "reviewed"  # 🟢
+                    status_type = "reviewed"
                 elif sub.status == "needs_revision":
-                    status_type = "revision"  # 🟠
+                    status_type = "revision"
                 else:
-                    status_type = "submitted"  # 🟡
+                    status_type = "submitted"
             elif qr and qr.passed:
-                status_type = "quiz_passed"  # 🟢
+                status_type = "quiz_passed"
             else:
                 if l.deadline and now > l.deadline:
-                    status_type = "overdue"  # 🔴
+                    status_type = "overdue"
                 else:
-                    status_type = "missing"  # 🔴 (Не приступал)
+                    status_type = "missing"
 
             row_cells.append({
                 "lesson": l,
@@ -497,17 +519,32 @@ def tutor_add_student(
 @router.get("/settings", response_class=HTMLResponse)
 def tutor_settings(request: Request, db: Session = Depends(get_db), current_user: User = Depends(require_tutor)):
     storage_status = storage_service.get_status()
-    from app.config import TUTOR_CONTACTS
+    tutor_contacts = {
+        "phone": current_user.phone or "",
+        "telegram": current_user.telegram or "",
+        "email": current_user.email or "",
+        "whatsapp": current_user.whatsapp or "",
+        "max_link": current_user.max_link or ""
+    }
     return templates.TemplateResponse(
         request=request,
         name="tutor/settings.html",
         context={
             "current_user": current_user,
             "storage_status": storage_status,
-            "tutor_contacts": TUTOR_CONTACTS,
+            "tutor_contacts": tutor_contacts,
             "message": request.query_params.get("msg")
         }
     )
+
+
+@router.post("/settings/test_gdrive")
+def tutor_test_gdrive(
+    current_user: User = Depends(require_tutor)
+):
+    """AJAX endpoint to test Google Drive connectivity and permissions."""
+    result = storage_service.test_upload()
+    return result
 
 
 @router.post("/settings/upload_key")
@@ -517,7 +554,7 @@ async def tutor_settings_upload_key(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tutor)
 ):
-    from app.config import GDRIVE_SERVICE_ACCOUNT_FILE
+    from app.config import GDRIVE_SERVICE_ACCOUNT_FILE, BASE_DIR
     content = ""
     if file and file.filename:
         file_bytes = await file.read()
@@ -526,17 +563,108 @@ async def tutor_settings_upload_key(
         content = json_text.strip()
 
     if content:
-        # Validate that it's json
         try:
-            json.loads(content)
-            with open(GDRIVE_SERVICE_ACCOUNT_FILE, "w", encoding="utf-8") as f:
-                f.write(content)
-            storage_service.reload()
-            return RedirectResponse(url="/tutor/settings?msg=key_saved", status_code=status.HTTP_303_SEE_OTHER)
+            parsed = json.loads(content)
+            # Check if this is an OAuth user token.json
+            if "refresh_token" in parsed or ("token" in parsed and "client_id" in parsed):
+                with open(BASE_DIR / "token.json", "w", encoding="utf-8") as f:
+                    f.write(content)
+                storage_service.reload()
+                return RedirectResponse(url="/tutor/settings?msg=token_saved", status_code=status.HTTP_303_SEE_OTHER)
+            # Check if this is an OAuth client credentials.json
+            elif "web" in parsed or "installed" in parsed:
+                with open(BASE_DIR / "credentials.json", "w", encoding="utf-8") as f:
+                    f.write(content)
+                storage_service.reload()
+                return RedirectResponse(url="/tutor/settings?msg=credentials_saved", status_code=status.HTTP_303_SEE_OTHER)
+            else:
+                # Save as service_account.json
+                with open(GDRIVE_SERVICE_ACCOUNT_FILE, "w", encoding="utf-8") as f:
+                    f.write(content)
+                storage_service.reload()
+                return RedirectResponse(url="/tutor/settings?msg=key_saved", status_code=status.HTTP_303_SEE_OTHER)
         except Exception as e:
             return RedirectResponse(url=f"/tutor/settings?msg=error_{str(e)}", status_code=status.HTTP_303_SEE_OTHER)
 
     return RedirectResponse(url="/tutor/settings", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/settings/oauth/start")
+def tutor_oauth_start(
+    request: Request,
+    current_user: User = Depends(require_tutor)
+):
+    from app.config import BASE_DIR
+    cred_path = BASE_DIR / "credentials.json"
+    if not cred_path.exists():
+        return RedirectResponse(url="/tutor/settings?msg=error_no_credentials", status_code=status.HTTP_303_SEE_OTHER)
+
+    try:
+        from google_auth_oauthlib.flow import Flow
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+        callback_url = str(request.url_for("tutor_oauth_callback"))
+
+        flow = Flow.from_client_secrets_file(
+            str(cred_path),
+            scopes=['https://www.googleapis.com/auth/drive'],
+            redirect_uri=callback_url
+        )
+        auth_url, _ = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent'
+        )
+        return RedirectResponse(url=auth_url, status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/tutor/settings?msg=error_oauth_start_{str(e)}", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/settings/oauth/callback")
+def tutor_oauth_callback(
+    request: Request,
+    code: Optional[str] = None,
+    error: Optional[str] = None,
+    current_user: User = Depends(require_tutor)
+):
+    if error or not code:
+        return RedirectResponse(url=f"/tutor/settings?msg=error_oauth_{error or 'denied'}", status_code=status.HTTP_303_SEE_OTHER)
+
+    from app.config import BASE_DIR
+    cred_path = BASE_DIR / "credentials.json"
+    try:
+        from google_auth_oauthlib.flow import Flow
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+        callback_url = str(request.url_for("tutor_oauth_callback"))
+
+        flow = Flow.from_client_secrets_file(
+            str(cred_path),
+            scopes=['https://www.googleapis.com/auth/drive'],
+            redirect_uri=callback_url
+        )
+        flow.fetch_token(code=code)
+        creds = flow.credentials
+        with open(BASE_DIR / "token.json", "w", encoding="utf-8") as f:
+            f.write(creds.to_json())
+
+        storage_service.reload()
+        return RedirectResponse(url="/tutor/settings?msg=oauth_success", status_code=status.HTTP_303_SEE_OTHER)
+    except Exception as e:
+        return RedirectResponse(url=f"/tutor/settings?msg=error_oauth_callback_{str(e)}", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/settings/oauth/disconnect")
+def tutor_oauth_disconnect(
+    current_user: User = Depends(require_tutor)
+):
+    from app.config import BASE_DIR
+    token_path = BASE_DIR / "token.json"
+    if token_path.exists():
+        try:
+            token_path.unlink()
+        except Exception:
+            pass
+    storage_service.reload()
+    return RedirectResponse(url="/tutor/settings?msg=oauth_disconnected", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/settings/contacts")
@@ -549,11 +677,11 @@ def tutor_settings_update_contacts(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tutor)
 ):
-    from app.config import TUTOR_CONTACTS
-    TUTOR_CONTACTS["phone"] = phone.strip()
-    TUTOR_CONTACTS["telegram"] = telegram.strip()
-    TUTOR_CONTACTS["email"] = email.strip()
-    TUTOR_CONTACTS["whatsapp"] = whatsapp.strip()
-    TUTOR_CONTACTS["max"] = max_link.strip()
+    current_user.phone = phone.strip()
+    current_user.telegram = telegram.strip()
+    current_user.email = email.strip()
+    current_user.whatsapp = whatsapp.strip()
+    current_user.max_link = max_link.strip()
+    db.commit()
     return RedirectResponse(url="/tutor/settings?msg=contacts_saved", status_code=status.HTTP_303_SEE_OTHER)
 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Настройки — KIBERone{% endblock %}
+{% block title %}Настройки Google Drive — KIBERone{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-8">
@@ -25,7 +25,22 @@
         {% if message == 'key_saved' %}
         <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
             <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-            <span>Ключ Google Drive успешно сохранен и подключен!</span>
+            <span>Ключ Service Account успешно сохранен и подключен!</span>
+        </div>
+        {% elif message == 'token_saved' or message == 'oauth_success' %}
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span>Google Drive успешно авторизован через аккаунт владельца! Файлы сохраняются на Google Drive.</span>
+        </div>
+        {% elif message == 'credentials_saved' %}
+        <div class="p-4 rounded-2xl bg-sky-50 border border-sky-300 text-sky-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-info text-sky-600 text-base"></i>
+            <span>Файл credentials.json сохранен! Теперь нажмите кнопку «Авторизоваться через Google» ниже или выполните в консоли: python setup_oauth.py</span>
+        </div>
+        {% elif message == 'oauth_disconnected' %}
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i>
+            <span>Google Drive OAuth токен отключен. Хранилище переведено в резервный режим.</span>
         </div>
         {% elif message == 'contacts_saved' %}
         <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
@@ -46,66 +61,231 @@
             <div>
                 <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
                     <i class="fa-brands fa-google-drive text-[#13c9ba]"></i>
-                    <span>Google Drive Хранилище</span>
+                    <span>Состояние Google Drive</span>
                 </h2>
                 <p class="text-xs text-slate-500 mt-0.5">{{ storage_status.status_message }}</p>
             </div>
-            <div>
-                {% if storage_status.is_gdrive %}
+            <div class="flex items-center gap-2">
+                {% if storage_status.auth_type == 'oauth' %}
                     <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
-                        Google Drive Активен
+                        OAuth Активен
                     </span>
-                {% else %}
+                {% elif storage_status.auth_type == 'service_account' %}
                     <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
                         <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
-                        Локальный режим (ожидает ключ JSON)
+                        Сервисный аккаунт (квота 0 байт)
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-slate-100 text-slate-700 border border-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-slate-400 mr-2"></span>
+                        Локальный режим (резерв)
                     </span>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Google Cloud Details -->
+        <!-- Warning about Service Account 0MB quota if using service_account -->
+        {% if storage_status.auth_type == 'service_account' and not storage_status.has_token %}
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
+            <div class="font-bold flex items-center gap-2 text-amber-800">
+                <i class="fa-solid fa-triangle-exclamation text-base"></i>
+                <span>Почему файлы пока сохраняются локально?</span>
+            </div>
+            <p class="text-slate-700 leading-relaxed">
+                Сервисный аккаунт Google Cloud (<code class="bg-amber-150 px-1 py-0.5 rounded text-amber-950 font-mono">{{ storage_status.service_account_email }}</code>) подключен, но по правилам Google у него <strong>0 байт квоты</strong>. На личных дисках (<code class="text-slate-800 font-mono">@gmail.com</code>) Google отклоняет загрузку с ошибкой <em>storageQuotaExceeded</em>.
+            </p>
+            <p class="text-slate-700 font-semibold">
+                Чтобы загружать файлы напрямую в папку <code class="font-mono">KiberOneHW</code>, подключите авторизацию владельца диска (<strong>OAuth 2.0</strong>) в блоке ниже.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Folder Info -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="text-slate-400 font-bold uppercase text-[10px]">ID целевой папки Google Drive (KiberOneHW):</div>
+                <div class="text-slate-900 font-mono font-bold break-all select-all flex items-center justify-between">
+                    <span>{{ storage_status.folder_id }}</span>
+                    <a href="https://drive.google.com/drive/folders/{{ storage_status.folder_id }}" target="_blank" class="text-[#13c9ba] hover:underline text-xs flex items-center gap-1">
+                        <span>Открыть папку</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+            </div>
+
             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                 <div class="text-slate-400 font-bold uppercase text-[10px]">Сервисный аккаунт Google:</div>
                 <div class="text-slate-900 font-mono font-bold break-all select-all">
                     {{ storage_status.service_account_email }}
                 </div>
             </div>
+        </div>
 
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <div class="text-slate-400 font-bold uppercase text-[10px]">ID папки Google Drive (Parent ID):</div>
-                <div class="text-slate-900 font-mono font-bold break-all select-all">
-                    {{ storage_status.folder_id }}
+        <!-- Smart Deduplication & Storage Optimization Banner -->
+        <div class="p-4 rounded-2xl bg-slate-900 text-white space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-7 h-7 rounded-lg bg-[#13c9ba]/20 text-[#13c9ba] flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-recycle"></i>
+                    </span>
+                    <div>
+                        <h4 class="text-xs font-black text-white">Умная оптимизация и дедупликация файлов</h4>
+                        <p class="text-[10px] text-slate-400">Одинаковые файлы не дублируются на Google Drive, экономя дисковую квоту и интернет</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-400 border border-emerald-400/30">
+                    MD5 Match
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-1 text-xs">
+                <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase">Сэкономлено дубликатов:</div>
+                    <div class="text-lg font-black text-[#13c9ba]">{{ storage_status.dedup_stats.files_deduplicated }} файлов</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase">Сэкономлено памяти на Диске:</div>
+                    <div class="text-lg font-black text-[#f7c90e]">{{ storage_status.dedup_stats.bytes_saved|filesize }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Upload JSON Key form -->
-        <div class="pt-2 border-t border-slate-100 space-y-4">
-            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-key text-[#f7c90e]"></i>
-                <span>Загрузить ключ сервисного аккаунта (service_account.json)</span>
-            </h3>
+        <!-- Live Diagnostics Test Button -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-xs font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-satellite-dish text-[#13c9ba]"></i>
+                        <span>Диагностика подключения к Google Drive</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">
+                        Проверяет доступность папки KiberOneHW и права на сохранение файлов
+                    </p>
+                </div>
+                <button type="button" id="btn-test-drive" onclick="runDriveProbe()"
+                        class="px-4 py-2 bg-[#13c9ba] hover:bg-[#0fa89b] text-slate-950 font-black text-xs rounded-xl transition shadow flex items-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-play"></i>
+                    <span id="btn-test-text">Проверить подключение</span>
+                </button>
+            </div>
 
-            <form action="/tutor/settings/upload_key" method="POST" enctype="multipart/form-data" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Способ 1: Выберите JSON файл ключа</label>
-                        <input type="file" name="file" accept=".json"
-                               class="w-full text-xs text-slate-600 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#13c9ba] file:text-slate-950 hover:file:bg-[#0fa89b] cursor-pointer">
+            <!-- Result Box -->
+            <div id="probe-result-box" class="hidden p-4 rounded-xl text-xs space-y-2"></div>
+        </div>
+
+        <!-- Option 1: OAuth 2.0 (Recommended for personal Gmail Drive) -->
+        <div class="border-t border-slate-100 pt-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-600 flex items-center justify-center text-xs">1</span>
+                    <i class="fa-solid fa-user-shield text-emerald-500"></i>
+                    <span>Рекомендуемый способ: OAuth 2.0</span>
+                </h3>
+                {% if storage_status.has_token %}
+                <form action="/tutor/settings/oauth/disconnect" method="POST" onsubmit="return confirm('Отключить OAuth токен?');">
+                    <button type="submit" class="text-rose-600 hover:text-rose-700 text-xs font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-power-off"></i> Отключить токен
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 text-xs text-slate-700 space-y-3">
+                <p>
+                    При подключении через OAuth 2.0 файлы сохраняются прямо в вашу папку <strong>KiberOneHW</strong> от имени вашего Google аккаунта (без ограничений квоты сервисного аккаунта).
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                    <!-- Option A: In-Browser Login (if credentials.json is present) -->
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 space-y-2">
+                        <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-brands fa-google text-rose-500"></i>
+                            <span>Вариант А: В 1 клик в браузере</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">
+                            {% if storage_status.oauth_client_exists %}
+                                Файл credentials.json обнаружен! Нажмите кнопку для входа:
+                            {% else %}
+                                Загрузите <code class="font-mono">credentials.json</code> из Google Cloud Console и нажмите кнопку:
+                            {% endif %}
+                        </p>
+                        {% if storage_status.oauth_client_exists %}
+                            <a href="/tutor/settings/oauth/start"
+                               class="inline-flex items-center space-x-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow transition">
+                                <i class="fa-brands fa-google text-[#f7c90e]"></i>
+                                <span>Войти через Google и дать доступ</span>
+                            </a>
+                        {% else %}
+                            <a href="https://console.cloud.google.com/apis/credentials?project=kiberone-hw" target="_blank"
+                               class="inline-flex items-center space-x-1.5 text-xs text-[#13c9ba] hover:underline font-bold">
+                                <span>1. Скачать credentials.json в Google Console</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        {% endif %}
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Способ 2: Или вставьте текст JSON ключа</label>
-                        <textarea name="json_text" rows="3" placeholder='{"type": "service_account", ...}'
-                                  class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-mono"></textarea>
+
+                    <!-- Option B: CLI Setup -->
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 space-y-2">
+                        <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-terminal text-slate-700"></i>
+                            <span>Вариант Б: Через терминал</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">
+                            Запустите готовый скрипт в папке проекта:
+                        </p>
+                        <div class="p-2 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-lg select-all flex items-center justify-between">
+                            <span>python setup_oauth.py</span>
+                            <i class="fa-regular fa-copy text-slate-500"></i>
+                        </div>
                     </div>
                 </div>
 
-                <button type="submit" class="px-5 py-2.5 bg-[#14171f] hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-md flex items-center space-x-2">
-                    <i class="fa-solid fa-upload text-[#13c9ba]"></i>
-                    <span>Сохранить и подключить Google Drive</span>
+                <!-- Upload credentials.json or token.json form -->
+                <form action="/tutor/settings/upload_key" method="POST" enctype="multipart/form-data" class="pt-2 border-t border-emerald-100 space-y-2">
+                    <label class="block text-xs font-bold text-slate-800">
+                        Загрузить файл OAuth: <code class="font-mono text-emerald-800">credentials.json</code> или <code class="font-mono text-emerald-800">token.json</code>
+                    </label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="file" name="file" accept=".json"
+                               class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#13c9ba] file:text-slate-950 hover:file:bg-[#0fa89b] cursor-pointer">
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center space-x-2 shrink-0">
+                            <i class="fa-solid fa-upload text-[#13c9ba]"></i>
+                            <span>Загрузить OAuth файл</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Option 2: Service Account (for Workspace Shared Drives) -->
+        <div class="border-t border-slate-100 pt-6 space-y-4">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-700 flex items-center justify-center text-xs">2</span>
+                <i class="fa-solid fa-building text-amber-500"></i>
+                <span>Альтернативный способ: Service Account (для Google Workspace «Общих дисков»)</span>
+            </h3>
+            <p class="text-xs text-slate-500">
+                Если у школы подключен корпоративный Google Workspace и папка находится в разделе <strong>«Общие диски» (Shared Drives)</strong>:
+            </p>
+
+            <form action="/tutor/settings/upload_key" method="POST" enctype="multipart/form-data" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Файл ключа service_account.json</label>
+                        <input type="file" name="file" accept=".json"
+                               class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-800 hover:file:bg-slate-300 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Или вставьте текст JSON ключа</label>
+                        <textarea name="json_text" rows="2" placeholder='{"type": "service_account", ...}'
+                                  class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-mono"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition flex items-center space-x-2">
+                    <i class="fa-solid fa-key text-amber-500"></i>
+                    <span>Обновить Service Account</span>
                 </button>
             </form>
         </div>
@@ -170,4 +350,65 @@
     </div>
 
 </div>
+
+<script>
+async function runDriveProbe() {
+    const btn = document.getElementById('btn-test-drive');
+    const btnText = document.getElementById('btn-test-text');
+    const resultBox = document.getElementById('probe-result-box');
+
+    btn.disabled = true;
+    btnText.textContent = 'Проверка...';
+    resultBox.className = 'p-4 rounded-xl text-xs space-y-2 bg-slate-100 border border-slate-200 text-slate-700 block';
+    resultBox.innerHTML = '<div class="flex items-center gap-2"><i class="fa-solid fa-circle-notch fa-spin text-[#13c9ba]"></i><span>Отправка проверочного файла в Google Drive...</span></div>';
+
+    try {
+        const response = await fetch('/tutor/settings/test_gdrive', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+            resultBox.className = 'p-4 rounded-xl text-xs space-y-2 bg-emerald-50 border border-emerald-300 text-emerald-900 block';
+            resultBox.innerHTML = `
+                <div class="font-bold flex items-center gap-2 text-emerald-800">
+                    <i class="fa-solid fa-circle-check text-base text-emerald-600"></i>
+                    <span>Успешная загрузка на Google Drive!</span>
+                </div>
+                <p>${data.message}</p>
+                <div class="text-[11px] text-slate-600">
+                    Папка: <strong>${data.folder_name}</strong> | Владелец: <strong>${data.owner_email || 'Google'}</strong> | Авторизация: <strong>${data.auth_type}</strong>
+                </div>
+            `;
+        } else {
+            if (data.error_type === 'QUOTA_EXCEEDED') {
+                resultBox.className = 'p-4 rounded-xl text-xs space-y-2 bg-amber-50 border border-amber-300 text-amber-900 block';
+                resultBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-2 text-amber-800">
+                        <i class="fa-solid fa-triangle-exclamation text-base text-amber-600"></i>
+                        <span>Ошибка квоты сервисного аккаунта Google (0 байт)</span>
+                    </div>
+                    <p class="leading-relaxed">${data.message}</p>
+                    <div class="p-2 bg-amber-100/60 rounded-lg text-amber-950 text-[11px] font-semibold">
+                        Решение: Скачайте credentials.json и выполните авторизацию через OAuth 2.0 в блоке 1 выше.
+                    </div>
+                `;
+            } else {
+                resultBox.className = 'p-4 rounded-xl text-xs space-y-2 bg-rose-50 border border-rose-300 text-rose-900 block';
+                resultBox.innerHTML = `
+                    <div class="font-bold flex items-center gap-2 text-rose-800">
+                        <i class="fa-solid fa-circle-xmark text-base text-rose-600"></i>
+                        <span>Ошибка подключения к Google Drive</span>
+                    </div>
+                    <p>${data.message}</p>
+                `;
+            }
+        }
+    } catch (err) {
+        resultBox.className = 'p-4 rounded-xl text-xs space-y-2 bg-rose-50 border border-rose-300 text-rose-900 block';
+        resultBox.innerHTML = `<p>Ошибка запроса к серверу: ${err}</p>`;
+    } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Проверить подключение';
+    }
+}
+</script>
 {% endblock %}

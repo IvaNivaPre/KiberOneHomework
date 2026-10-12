@@ -5,3 +5,6 @@ service_account.json
 credentials.json
 token.json
 .pytest_cache/
+uploads/*
+!uploads/demo_*
+!uploads/.gitkeep

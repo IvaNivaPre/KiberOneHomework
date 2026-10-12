@@ -1,169 +1,254 @@
 {% extends "base.html" %}
 
-{% block title %}Личный кабинет — KIBERone{% endblock %}
+{% block title %}Мои задания — KIBERone{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
 
-    <!-- Welcome Hero -->
-    <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="space-y-2 z-10">
-            <div class="inline-flex items-center space-x-2 bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+    <!-- Welcome Hero Banner -->
+    <div class="bg-gradient-to-r from-[#14171f] via-[#1c2230] to-[#14171f] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-[#232938] flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-[#13c9ba]/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-32 -top-10 w-48 h-48 bg-[#f7c90e]/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="space-y-2.5 z-10">
+            <div class="inline-flex items-center space-x-2 bg-[#13c9ba]/15 text-[#13c9ba] border border-[#13c9ba]/30 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
                 <i class="fa-solid fa-gamepad"></i>
-                <span>Личный кабинет резидента</span>
+                <span>Твой личный кабинет</span>
             </div>
-            <h1 class="text-3xl font-black tracking-tight">Привет, {{ current_user.full_name }}! 🚀</h1>
-            <p class="text-purple-200/80 text-sm max-w-xl">
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white">
+                Привет, {{ current_user.full_name }}! 👋
+            </h1>
+            <p class="text-slate-300 text-sm max-w-xl">
                 {% if group %}
-                    Группа: <strong class="text-cyan-300">{{ group.name }}</strong>. 
+                    Группа: <strong class="text-[#f7c90e]">{{ group.name }}</strong>.
                 {% endif %}
-                Выполняй домашние задания вовремя, зажигай зеленые галочки и прокачивай навыки кибер-героя!
+                Выполняй задания вовремя, зажигай зеленые галочки и получай отличные оценки!
             </p>
         </div>
 
+        <!-- Kids Progress Stats -->
         <div class="z-10 flex items-center gap-3">
-            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-w-[130px]">
-                <div class="text-2xl font-black text-emerald-400 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span>{{ sub_map|length }}</span>
+            <!-- Pending counter -->
+            <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center min-w-[120px]">
+                <div class="text-2xl font-black text-[#f7c90e] flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-fire text-lg"></i>
+                    <span>{{ pending_items|length }}</span>
                 </div>
-                <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mt-1">Сдано заданий</div>
+                <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mt-1">Надо сделать</div>
+            </div>
+
+            <!-- Completed counter -->
+            <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center min-w-[120px]">
+                <div class="text-2xl font-black text-[#13c9ba] flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-lg"></i>
+                    <span>{{ completed_items|length }}</span>
+                </div>
+                <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mt-1">Сделано</div>
             </div>
         </div>
     </div>
 
-    <!-- Modules and Lessons with Completion Indicators -->
+    <!-- Very Clear Separation for Kids: TWO BIG TABS -->
     <div class="space-y-6">
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
-                <i class="fa-solid fa-layer-group text-purple-600"></i>
-                <span>Учебная программа</span>
-            </h2>
+        <div class="flex items-center space-x-3 border-b border-slate-200 pb-3">
+            <!-- Tab 1: Needs to be done -->
+            <button type="button" onclick="switchKidsTab('pending')" id="tab-btn-pending"
+                    class="kids-tab-active px-5 py-3 rounded-2xl font-black text-sm transition flex items-center space-x-2.5 cursor-pointer shadow-sm">
+                <i class="fa-solid fa-fire text-amber-500 text-base"></i>
+                <span>СДЕЛАТЬ СЕЙЧАС</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-black bg-[#f7c90e] text-slate-950">
+                    {{ pending_items|length }}
+                </span>
+            </button>
+
+            <!-- Tab 2: Already completed -->
+            <button type="button" onclick="switchKidsTab('completed')" id="tab-btn-completed"
+                    class="kids-tab-inactive px-5 py-3 rounded-2xl font-bold text-sm transition flex items-center space-x-2.5 cursor-pointer">
+                <i class="fa-solid fa-circle-check text-[#13c9ba] text-base"></i>
+                <span>МОИ ПОБЕДЫ (СДЕЛАНО)</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">
+                    {{ completed_items|length }}
+                </span>
+            </button>
         </div>
 
-        {% if modules %}
-            {% for mod in modules %}
-            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8 space-y-6">
-                <!-- Module Header -->
-                <div class="border-b border-slate-100 pb-4">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-100 text-cyan-800 uppercase tracking-wider">
-                        Модуль {{ loop.index }}
-                    </span>
-                    <h3 class="text-xl font-black text-slate-900 mt-1">{{ mod.title }}</h3>
-                    {% if mod.description %}
-                    <p class="text-xs text-slate-500 mt-0.5">{{ mod.description }}</p>
-                    {% endif %}
-                </div>
-
-                <!-- Lessons in Module -->
+        <!-- ================= SECTION 1: PENDING TASKS (НАДО СДЕЛАТЬ) ================= -->
+        <div id="section-pending" class="space-y-5">
+            {% if pending_items %}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {% for lesson in mod.lessons %}
-                        {% set sub = sub_map.get(lesson.id) %}
-                        {% set qr = quiz_map.get(lesson.quiz.id) if lesson.quiz else None %}
-                        {% set is_overdue = lesson.deadline and now > lesson.deadline and not sub %}
+                    {% for item in pending_items %}
+                    <div class="bg-white rounded-3xl border-2 {% if item.is_overdue %}border-rose-300 hover:border-rose-400 bg-rose-50/20{% else %}border-amber-200 hover:border-[#13c9ba] hover:shadow-lg{% endif %} transition p-6 flex flex-col justify-between space-y-4 shadow-sm group">
+                        
+                        <div class="space-y-3">
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-xl text-xs font-black bg-amber-100 text-amber-900 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clock text-amber-600"></i>
+                                    <span>Ждет выполнения</span>
+                                </span>
 
-                        <div class="rounded-2xl border transition p-5 flex flex-col justify-between space-y-4
-                            {% if sub and sub.status == 'reviewed' %}
-                                bg-emerald-50/40 border-emerald-300 hover:border-emerald-400 shadow-sm
-                            {% elif sub and sub.status == 'submitted' %}
-                                bg-amber-50/40 border-amber-300 hover:border-amber-400 shadow-sm
-                            {% elif is_overdue %}
-                                bg-rose-50/40 border-rose-300 hover:border-rose-400
-                            {% else %}
-                                bg-slate-50/50 border-slate-200 hover:border-purple-300
-                            {% endif %}">
-
-                            <div class="space-y-3">
-                                <!-- Top status badge (ЗЕЛЕНАЯ / КРАСНАЯ ГАЛОЧКА) -->
-                                <div class="flex items-center justify-between">
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase">
-                                        Урок {{ loop.index }}
+                                {% if item.is_overdue %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700">
+                                        Просрочено
                                     </span>
-
-                                    {% if sub and sub.status == 'reviewed' %}
-                                        <!-- 🟢 ЗЕЛЕНАЯ ГАЛОЧКА: Проверено -->
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5 text-sm"></i>
-                                            <span>ВЫПОЛНЕНО ✓</span>
-                                        </span>
-                                    {% elif sub and sub.status == 'submitted' %}
-                                        <!-- 🟡 ЖЕЛТЫЙ: На проверке -->
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                                            <i class="fa-solid fa-clock text-amber-600 mr-1.5"></i>
-                                            <span>На проверке</span>
-                                        </span>
-                                    {% elif sub and sub.status == 'needs_revision' %}
-                                        <!-- 🟠 ОРАНЖЕВЫЙ: Доработка -->
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-300">
-                                            <i class="fa-solid fa-rotate-left text-orange-600 mr-1.5"></i>
-                                            <span>Доработать</span>
-                                        </span>
-                                    {% elif qr and qr.passed %}
-                                        <!-- 🟢 ЗЕЛЕНАЯ ГАЛОЧКА: Тест сдан -->
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i>
-                                            <span>ТЕСТ СДАН ✓</span>
-                                        </span>
-                                    {% elif is_overdue %}
-                                        <!-- 🔴 КРАСНЫЙ МАРКЕР: Просрочено -->
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300">
-                                            <i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5 text-sm"></i>
-                                            <span>ПРОСРОЧЕНО ✕</span>
-                                        </span>
-                                    {% else %}
-                                        <!-- 🔴 КРАСНЫЙ МАРКЕР: Не выполнено -->
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <i class="fa-solid fa-xmark text-rose-500 mr-1.5"></i>
-                                            <span>Не выполнено</span>
-                                        </span>
-                                    {% endif %}
-                                </div>
-
-                                <h4 class="text-base font-black text-slate-900 leading-snug">{{ lesson.title }}</h4>
-                                
-                                {% if lesson.description %}
-                                <p class="text-xs text-slate-500 line-clamp-2">{{ lesson.description }}</p>
                                 {% endif %}
+                            </div>
 
-                                <!-- Grade or deadline badge -->
-                                <div class="pt-1">
-                                    {% if sub and sub.grade %}
-                                        <div class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-100/60 px-2.5 py-1 rounded-lg">
-                                            <i class="fa-solid fa-award text-emerald-600"></i>
-                                            <span>Оценка тьютора: {{ sub.grade }}</span>
-                                        </div>
-                                    {% elif lesson.deadline %}
-                                        <div class="text-[11px] font-semibold {% if is_overdue %}text-rose-600{% else %}text-slate-500{% endif %} flex items-center gap-1">
-                                            <i class="fa-regular fa-clock"></i>
-                                            <span>{{ lesson.deadline|deadline_badge }} (до {{ lesson.deadline.strftime('%d.%m %H:%M') }})</span>
-                                        </div>
-                                    {% endif %}
+                            <!-- Lesson Title -->
+                            <h3 class="text-lg font-black text-slate-900 group-hover:text-[#13c9ba] transition leading-snug">
+                                {{ item.lesson.title }}
+                            </h3>
+
+                            <div class="text-xs text-slate-500 font-medium">
+                                {{ item.module.title }}
+                            </div>
+
+                            <!-- Simple Deadline description for kids -->
+                            {% if item.lesson.deadline %}
+                            <div class="p-3 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-center space-x-2 text-xs font-bold text-amber-900">
+                                <i class="fa-regular fa-calendar-check text-base text-amber-600"></i>
+                                <div>
+                                    <div>Сдать до: {{ item.lesson.deadline.strftime('%d.%m.%Y (%H:%M)') }}</div>
+                                    <div class="text-[11px] font-semibold text-amber-700 mt-0.5">{{ item.lesson.deadline|deadline_badge }}</div>
                                 </div>
                             </div>
-
-                            <!-- Action button -->
-                            <div class="pt-3 border-t border-slate-200/60">
-                                <a href="/student/lesson/{{ lesson.id }}"
-                                   class="w-full py-2.5 px-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-purple-600/20">
-                                    <span>{% if sub %}Посмотреть работу{% else %}Открыть урок и сдать ДЗ{% endif %}</span>
-                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                                </a>
-                            </div>
-
+                            {% endif %}
                         </div>
+
+                        <!-- Big friendly action button -->
+                        <div class="pt-2">
+                            <a href="/student/lesson/{{ item.lesson.id }}"
+                               class="w-full py-3.5 px-4 bg-gradient-to-r from-[#13c9ba] to-[#0fa89b] hover:from-[#0fa89b] hover:to-[#0c8f84] text-slate-950 font-black rounded-2xl text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-[#13c9ba]/25 transform group-hover:scale-102">
+                                <span>Открыть и сделать задание</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="bg-white rounded-3xl border border-dashed border-slate-200 p-12 text-center text-slate-400">
-                <i class="fa-solid fa-graduation-cap text-4xl mb-3 text-slate-300"></i>
-                <div class="font-bold text-slate-700">Уроки пока не добавлены</div>
-                <div class="text-xs mt-1">Тьютор скоро добавит материалы для вашей группы!</div>
-            </div>
-        {% endif %}
+            {% else %}
+                <!-- All caught up state! -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
+                    <div class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl font-black shadow-md shadow-emerald-500/20">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900">Все задания выполнены! 🎉</h3>
+                    <p class="text-sm text-slate-500 max-w-md mx-auto">
+                        Ты выполнил все доступные домашние задания. Новые уроки появятся после следующего занятия!
+                    </p>
+                    <button onclick="switchKidsTab('completed')" class="mt-2 px-5 py-2.5 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-xs rounded-xl transition inline-flex items-center gap-2">
+                        <span>Посмотреть свои выполненные работы</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ================= SECTION 2: COMPLETED TASKS (МОИ ПОБЕДЫ) ================= -->
+        <div id="section-completed" class="space-y-5 hidden">
+            {% if completed_items %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {% for item in completed_items %}
+                    <div class="bg-white rounded-3xl border-2 border-emerald-300 hover:border-emerald-400 transition p-6 flex flex-col justify-between space-y-4 shadow-sm">
+                        
+                        <div class="space-y-3">
+                            <!-- Green checkmark badge -->
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-900 flex items-center gap-1.5 border border-emerald-200">
+                                    <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                                    <span>ВЫПОЛНЕНО ✓</span>
+                                </span>
+
+                                {% if item.submission and item.submission.grade %}
+                                    <span class="px-3 py-1 rounded-xl text-xs font-black bg-[#f7c90e] text-slate-950 flex items-center gap-1 shadow-sm">
+                                        <i class="fa-solid fa-star text-xs"></i>
+                                        <span>{{ item.submission.grade }}</span>
+                                    </span>
+                                {% elif item.quiz_result and item.quiz_result.passed %}
+                                    <span class="px-3 py-1 rounded-xl text-xs font-black bg-[#13c9ba] text-slate-950">
+                                        Тест: {{ item.quiz_result.percentage }}%
+                                    </span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                                        На проверке
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Lesson Title -->
+                            <h3 class="text-lg font-black text-slate-900 leading-snug">
+                                {{ item.lesson.title }}
+                            </h3>
+
+                            <div class="text-xs text-slate-400 font-medium">
+                                {{ item.module.title }}
+                            </div>
+
+                            <!-- Tutor Feedback Praise (if reviewed) -->
+                            {% if item.submission and item.submission.tutor_comment %}
+                            <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1">
+                                <div class="font-bold flex items-center gap-1 text-emerald-700">
+                                    <i class="fa-solid fa-comment-dots"></i>
+                                    <span>Отзыв тьютора:</span>
+                                </div>
+                                <p class="text-slate-700 italic font-medium leading-relaxed">
+                                    «{{ item.submission.tutor_comment }}»
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Button to view submitted homework -->
+                        <div class="pt-2">
+                            <a href="/student/lesson/{{ item.lesson.id }}"
+                               class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl text-xs flex items-center justify-center space-x-2 transition">
+                                <i class="fa-solid fa-eye text-slate-500"></i>
+                                <span>Посмотреть свою работу</span>
+                            </a>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center text-slate-400">
+                    <i class="fa-solid fa-clipboard-list text-3xl mb-2 text-slate-300"></i>
+                    <div class="font-bold text-slate-700">Пока нет сданных заданий</div>
+                    <div class="text-xs mt-1">Открой вкладку «Сделать сейчас» и выполни свое первое задание!</div>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function switchKidsTab(tab) {
+        const pendingSec = document.getElementById('section-pending');
+        const completedSec = document.getElementById('section-completed');
+        const pendingBtn = document.getElementById('tab-btn-pending');
+        const completedBtn = document.getElementById('tab-btn-completed');
+
+        if (tab === 'pending') {
+            pendingSec.classList.remove('hidden');
+            completedSec.classList.add('hidden');
+            
+            pendingBtn.className = "px-5 py-3 rounded-2xl font-black text-sm transition flex items-center space-x-2.5 cursor-pointer shadow-sm bg-slate-900 text-white";
+            completedBtn.className = "px-5 py-3 rounded-2xl font-bold text-sm transition flex items-center space-x-2.5 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200";
+        } else {
+            pendingSec.classList.add('hidden');
+            completedSec.classList.remove('hidden');
+
+            completedBtn.className = "px-5 py-3 rounded-2xl font-black text-sm transition flex items-center space-x-2.5 cursor-pointer shadow-sm bg-slate-900 text-white";
+            pendingBtn.className = "px-5 py-3 rounded-2xl font-bold text-sm transition flex items-center space-x-2.5 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+    }
+
+    // Set initial classes
+    document.addEventListener('DOMContentLoaded', () => {
+        switchKidsTab('pending');
+    });
+</script>
 {% endblock %}

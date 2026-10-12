@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
-from app.config import BASE_DIR, UPLOAD_DIR
+from app.config import BASE_DIR, UPLOAD_DIR, TUTOR_CONTACTS
 from app.database import engine, Base
 from app.routers import auth_routes, tutor_routes, student_routes
 
@@ -31,7 +31,7 @@ app.include_router(auth_routes.router)
 app.include_router(tutor_routes.router)
 app.include_router(student_routes.router)
 
-# Custom Jinja2 Template Filters
+# Custom Jinja2 Template Filters & Globals
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
 def format_datetime(val: datetime, fmt: str = "%d.%m.%Y в %H:%M") -> str:
@@ -64,7 +64,13 @@ def format_filesize(num_bytes: int) -> str:
 templates.env.filters["datetime"] = format_datetime
 templates.env.filters["deadline_badge"] = format_deadline_badge
 templates.env.filters["filesize"] = format_filesize
+templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS
 
 auth_routes.templates.env.filters.update(templates.env.filters)
+auth_routes.templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS
+
 tutor_routes.templates.env.filters.update(templates.env.filters)
+tutor_routes.templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS
+
 student_routes.templates.env.filters.update(templates.env.filters)
+student_routes.templates.env.globals["TUTOR_CONTACTS"] = TUTOR_CONTACTS

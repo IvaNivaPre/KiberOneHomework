@@ -8,14 +8,14 @@
     <!-- Header & Navigation -->
     <div>
         <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
-            <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+            <a href="/tutor/dashboard" class="hover:text-[#13c9ba] transition">Главная</a>
             <span>/</span>
-            <a href="/tutor/group/{{ submission.lesson.module.group.id }}/matrix" class="hover:text-purple-600 transition">Светофор группы</a>
+            <a href="/tutor/group/{{ submission.lesson.module.group.id }}/matrix" class="hover:text-[#13c9ba] transition">Светофор группы</a>
             <span>/</span>
             <span class="text-slate-600 font-bold">Проверка работы</span>
         </div>
         <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <span class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+            <span class="w-10 h-10 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] flex items-center justify-center text-lg">
                 <i class="fa-solid fa-graduation-cap"></i>
             </span>
             <span>Проверка домашнего задания</span>
@@ -26,7 +26,7 @@
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-400 text-white font-black flex items-center justify-center text-base shadow-md shadow-purple-500/20">
+                <div class="w-12 h-12 rounded-2xl bg-[#13c9ba] text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
                     {{ submission.student.full_name[:1] }}
                 </div>
                 <div>
@@ -43,26 +43,26 @@
             </div>
         </div>
 
-        <div class="space-y-2">
-            <div class="text-xs font-bold uppercase tracking-wider text-purple-600">Тема урока:</div>
-            <h3 class="text-lg font-bold text-slate-900">{{ submission.lesson.title }}</h3>
+        <div class="space-y-1">
+            <div class="text-xs font-black uppercase tracking-wider text-[#13c9ba]">Тема урока:</div>
+            <h3 class="text-lg font-black text-slate-900">{{ submission.lesson.title }}</h3>
             {% if submission.lesson.description %}
             <p class="text-xs text-slate-500">{{ submission.lesson.description }}</p>
             {% endif %}
         </div>
 
         <!-- Student Submission Content -->
-        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 space-y-4">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                <i class="fa-solid fa-inbox text-purple-600"></i>
+        <div class="bg-slate-50 rounded-3xl p-6 border border-slate-200/80 space-y-4">
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                <i class="fa-solid fa-inbox text-[#13c9ba]"></i>
                 <span>Присланный ответ ученика</span>
             </h4>
 
             <!-- File attachment -->
             {% if submission.file_url %}
-            <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+            <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between gap-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
                         <i class="fa-solid fa-paperclip"></i>
                     </div>
                     <div>
@@ -75,18 +75,18 @@
                 </div>
 
                 <a href="{{ submission.file_url }}" target="_blank"
-                   class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center space-x-1.5">
+                   class="px-4 py-2 bg-[#13c9ba] hover:bg-[#0fa89b] text-slate-950 font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-cloud-arrow-down"></i>
                     <span>Открыть / Скачать</span>
                 </a>
             </div>
             {% endif %}
 
-            <!-- Text answer / code -->
+            <!-- Text answer / message -->
             {% if submission.text_answer %}
             <div class="space-y-1.5">
-                <div class="text-xs font-bold text-slate-700">Текстовый ответ / код:</div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 whitespace-pre-wrap">
+                <div class="text-xs font-bold text-slate-700">Текстовый ответ / комментарий ребенка:</div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 text-xs text-slate-800 whitespace-pre-wrap font-medium">
 {{ submission.text_answer }}
                 </div>
             </div>
@@ -101,24 +101,24 @@
 
         <!-- Grading & Feedback Form -->
         <form action="/tutor/submission/{{ submission.id }}/grade" method="POST" class="pt-4 border-t border-slate-100 space-y-5">
-            <h4 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-stamp text-emerald-600"></i>
-                <span>Оценка и рецензия тьютора</span>
+            <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-stamp text-[#f7c90e]"></i>
+                <span>Оценка и отзыв тьютора</span>
             </h4>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Оценка / Балл</label>
-                    <input type="text" name="grade" value="{{ submission.grade or '5 (Отлично!)' }}" required
+                    <input type="text" name="grade" value="{{ submission.grade or '5+ (Отлично)' }}" required
                            placeholder="Например: 5+, 100%, Зачтено"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold">
+                           class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-bold">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Статус проверки</label>
-                    <select name="status_choice" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-semibold">
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Статус в «Светофоре»</label>
+                    <select name="status_choice" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-semibold">
                         <option value="reviewed" {% if submission.status == 'reviewed' %}selected{% endif %}>
-                            🟢 Принято / Проверено (Загорается зеленая галочка)
+                            🟢 Зачтено / Проверено (Загорается зеленая галочка)
                         </option>
                         <option value="needs_revision" {% if submission.status == 'needs_revision' %}selected{% endif %}>
                             🟠 Требует доработки (Отправить ученику на исправление)
@@ -128,16 +128,16 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Комментарий / Обратная связь тьютора</label>
-                <textarea name="tutor_comment" rows="4" placeholder="Похвалите ребенка за сильные стороны, укажите, как оптимизировать алгоритм..."
-                          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">{{ submission.tutor_comment or '' }}</textarea>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Похвала / Комментарий для ребенка</label>
+                <textarea name="tutor_comment" rows="4" placeholder="Похвалите ребенка за старания, объясните, что сделано круто и что можно улучшить..."
+                          class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-medium">{{ submission.tutor_comment or '' }}</textarea>
             </div>
 
             <div class="flex items-center justify-between pt-2">
                 <a href="/tutor/group/{{ submission.lesson.module.group.id }}/matrix" class="px-4 py-2 text-slate-500 font-semibold text-xs hover:bg-slate-100 rounded-xl transition">
                     Отмена
                 </a>
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center space-x-2">
+                <button type="submit" class="px-6 py-3.5 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-xs rounded-2xl shadow-lg shadow-[#f7c90e]/30 transition flex items-center space-x-2">
                     <i class="fa-solid fa-circle-check"></i>
                     <span>Сохранить оценку (Зажечь зеленую галочку)</span>
                 </button>

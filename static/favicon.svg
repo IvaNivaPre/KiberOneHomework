@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="kiberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14171f"/>
+      <stop offset="100%" stop-color="#1f2533"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Squircle -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#kiberGrad)" stroke="#13c9ba" stroke-width="2.5"/>
+  
+  <!-- "K" in Brand Turquoise #13c9ba -->
+  <path d="M16 16 V48 M16 32 L32 16 M23 25 L34 48" stroke="#13c9ba" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- "1" in Brand Yellow #f7c90e -->
+  <path d="M41 22 L47 16 V48" stroke="#f7c90e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Cyber Accent Dot -->
+  <circle cx="53" cy="46" r="3" fill="#13c9ba"/>
+</svg>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}KIBERone — Домашние задания{% endblock %}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,10 +14,15 @@
                 extend: {
                     colors: {
                         kiber: {
-                            purple: '#6d28d9',
-                            dark: '#0f172a',
-                            neon: '#06b6d4',
-                            accent: '#8b5cf6',
+                            teal: '#13c9ba',
+                            'teal-hover': '#0fa89b',
+                            'teal-light': '#e8faf8',
+                            yellow: '#f7c90e',
+                            'yellow-hover': '#dfb408',
+                            'yellow-light': '#fefbe8',
+                            dark: '#14171f',
+                            surface: '#1c202a',
+                            border: '#282d3b',
                             card: '#ffffff'
                         }
                     }
@@ -26,72 +33,81 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-purple-500 selection:text-white">
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-[#13c9ba] selection:text-slate-900">
     <!-- Header / Navbar -->
-    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 text-white shadow-lg sticky top-0 z-50">
+    <header class="bg-[#14171f] text-white shadow-md border-b border-[#222735] sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Brand Logo -->
+                <!-- Brand Logo (Official KiberOne) -->
                 <div class="flex items-center space-x-3">
-                    <a href="/" class="flex items-center space-x-2.5 group">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center font-black text-xl shadow-md shadow-purple-500/30 group-hover:scale-105 transition duration-200">
-                            K1
-                        </div>
-                        <div>
-                            <span class="text-xl font-black tracking-tight text-white group-hover:text-cyan-300 transition">KIBER<span class="text-cyan-400">one</span></span>
-                            <span class="block text-[10px] uppercase tracking-wider text-purple-300 font-bold -mt-1">КиберШкола будущего</span>
-                        </div>
+                    <a href="/" class="flex items-center space-x-3 group">
+                        <img src="https://kiber-one.com/img/redesign2/logo.svg"
+                             onerror="this.onerror=null; this.src='/static/img/kiberone_logo.svg';"
+                             alt="KIBERone"
+                             class="h-8 sm:h-9 w-auto object-contain transition transform group-hover:scale-102">
+                        <span class="hidden sm:inline-block text-[11px] font-bold uppercase tracking-wider text-[#13c9ba] bg-[#13c9ba]/10 px-2 py-0.5 rounded-full border border-[#13c9ba]/20">
+                            ДЗ Платформа
+                        </span>
                     </a>
                 </div>
 
                 <!-- Navigation Links based on role -->
-                <nav class="hidden md:flex items-center space-x-4">
+                <nav class="hidden md:flex items-center space-x-2">
                     {% if current_user %}
                         {% if current_user.role in ['tutor', 'admin'] %}
-                            <a href="/tutor/dashboard" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
-                                <i class="fa-solid fa-chart-line text-purple-400"></i>
+                            <a href="/tutor/dashboard" class="px-3 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition flex items-center space-x-1.5 text-slate-200 hover:text-white">
+                                <i class="fa-solid fa-chart-line text-[#13c9ba]"></i>
                                 <span>Обзор</span>
                             </a>
-                            <a href="/tutor/groups" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
-                                <i class="fa-solid fa-layer-group text-cyan-400"></i>
-                                <span>Группы & Модули</span>
+                            <a href="/tutor/groups" class="px-3 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition flex items-center space-x-1.5 text-slate-200 hover:text-white">
+                                <i class="fa-solid fa-layer-group text-[#f7c90e]"></i>
+                                <span>Группы & Уроки</span>
                             </a>
-                            <a href="/tutor/students" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
+                            <a href="/tutor/students" class="px-3 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition flex items-center space-x-1.5 text-slate-200 hover:text-white">
                                 <i class="fa-solid fa-user-graduate text-emerald-400"></i>
-                                <span>Ученики</span>
+                                <span>Резиденты</span>
                             </a>
-                            <a href="/tutor/settings" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
-                                <i class="fa-brands fa-google-drive text-amber-400"></i>
+                            <a href="/tutor/settings" class="px-3 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition flex items-center space-x-1.5 text-slate-200 hover:text-white">
+                                <i class="fa-brands fa-google-drive text-[#13c9ba]"></i>
                                 <span>Google Drive</span>
                             </a>
                         {% else %}
-                            <a href="/student/dashboard" class="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition flex items-center space-x-1.5">
-                                <i class="fa-solid fa-book-open text-cyan-400"></i>
-                                <span>Мои уроки & ДЗ</span>
+                            <a href="/student/dashboard" class="px-3 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition flex items-center space-x-1.5 text-slate-200 hover:text-white">
+                                <i class="fa-solid fa-gamepad text-[#13c9ba]"></i>
+                                <span>Мои задания</span>
                             </a>
                         {% endif %}
                     {% endif %}
                 </nav>
 
-                <!-- User profile & Logout -->
-                <div class="flex items-center space-x-4">
+                <!-- Tutor Contact Button & User profile & Logout -->
+                <div class="flex items-center space-x-3">
+                    
+                    <!-- Friendly Contact with Tutor Button -->
+                    <button type="button" onclick="openContactModal()"
+                            class="inline-flex items-center space-x-2 px-3 py-1.5 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black rounded-xl text-xs transition shadow-sm shadow-[#f7c90e]/20 cursor-pointer">
+                        <i class="fa-solid fa-comments"></i>
+                        <span class="hidden sm:inline">Связь с преподавателем</span>
+                        <span class="sm:hidden">Контакты</span>
+                    </button>
+
                     {% if current_user %}
-                        <div class="flex items-center space-x-3 bg-white/10 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-white/10">
-                            <div class="w-7 h-7 rounded-full bg-cyan-400 text-slate-900 font-bold flex items-center justify-center text-xs">
+                        <div class="flex items-center space-x-2.5 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+                            <div class="w-7 h-7 rounded-full bg-[#13c9ba] text-slate-900 font-black flex items-center justify-center text-xs">
                                 {{ current_user.full_name[:1].upper() }}
                             </div>
-                            <div class="text-left text-xs">
-                                <div class="font-bold leading-tight">{{ current_user.full_name }}</div>
-                                <div class="text-purple-300 text-[10px]">
+                            <div class="text-left text-xs hidden lg:block">
+                                <div class="font-bold leading-tight text-white">{{ current_user.full_name }}</div>
+                                <div class="text-[#13c9ba] text-[10px] font-semibold">
                                     {% if current_user.role in ['tutor', 'admin'] %}Тьютор{% else %}Резидент КиберШколы{% endif %}
                                 </div>
                             </div>
                         </div>
-                        <a href="/logout" title="Выйти" class="text-slate-300 hover:text-white hover:bg-white/10 p-2 rounded-lg transition">
+                        <a href="/logout" title="Выйти" class="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         </a>
                     {% else %}
-                        <a href="/login" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-sm transition shadow-md shadow-purple-600/30">
+                        <a href="/login" class="bg-[#13c9ba] hover:bg-[#0fa89b] text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition shadow-md shadow-[#13c9ba]/20">
                             Войти в систему
                         </a>
                     {% endif %}
@@ -106,22 +122,122 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-sm text-slate-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-slate-700">KIBERone</span>
+    <footer class="bg-[#14171f] text-slate-400 border-t border-[#222735] py-6 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <span class="font-black text-white tracking-wide">KIBER<span class="text-[#13c9ba]">one</span></span>
                 <span>• Международная КиберШкола для детей</span>
             </div>
-            <div class="flex items-center space-x-4 text-xs">
-                <span class="flex items-center text-slate-600">
-                    <i class="fa-brands fa-google-drive mr-1.5 text-blue-500"></i> Облачное хранилище: Google Drive
+            
+            <div class="flex items-center space-x-4">
+                <button type="button" onclick="openContactModal()" class="text-[#f7c90e] hover:underline font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>Контакты преподавателя</span>
+                </button>
+                <span>|</span>
+                <span class="text-slate-400 flex items-center gap-1">
+                    <i class="fa-brands fa-google-drive text-[#13c9ba]"></i> Хранилище: Google Drive
                 </span>
-                <span>FastAPI + SQLite</span>
             </div>
         </div>
     </footer>
 
+    <!-- Contact with Tutor Modal (Вместо чата: Telegram, MAX, Телефон, Почта) -->
+    <div id="contact-tutor-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 relative animate-scale-up">
+            <button onclick="closeContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-2 rounded-xl">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] mx-auto flex items-center justify-center text-2xl font-black">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Связь с преподавателем</h3>
+                <p class="text-xs text-slate-500">
+                    Возник вопрос по домашке? Выберите удобный способ связи с тьютором KIBERone:
+                </p>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Telegram -->
+                <a href="{{ TUTOR_CONTACTS.telegram }}" target="_blank"
+                   class="flex items-center justify-between p-3.5 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-950 border border-sky-200 transition group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center text-lg">
+                            <i class="fa-brands fa-telegram"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-black text-sm">Telegram</div>
+                            <div class="text-[11px] text-sky-700 font-semibold">{{ TUTOR_CONTACTS.telegram_handle }}</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-sky-600 group-hover:translate-x-1 transition">&rarr;</span>
+                </a>
+
+                <!-- Phone / WhatsApp -->
+                <a href="{{ TUTOR_CONTACTS.whatsapp }}" target="_blank"
+                   class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200 transition group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-black text-sm">WhatsApp / Телефон</div>
+                            <div class="text-[11px] text-emerald-700 font-semibold">{{ TUTOR_CONTACTS.phone }}</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition">&rarr;</span>
+                </a>
+
+                <!-- MAX Assistant -->
+                <a href="{{ TUTOR_CONTACTS.max }}" target="_blank"
+                   class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-200 transition group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#f7c90e] text-slate-900 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-black text-sm">MAX Ассистент / Чат школы</div>
+                            <div class="text-[11px] text-amber-800 font-semibold">Онлайн помощник KIBERone</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-amber-700 group-hover:translate-x-1 transition">&rarr;</span>
+                </a>
+
+                <!-- Email -->
+                <a href="mailto:{{ TUTOR_CONTACTS.email }}"
+                   class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 transition group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-slate-700 text-white flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-black text-sm">Электронная почта</div>
+                            <div class="text-[11px] text-slate-500 font-semibold">{{ TUTOR_CONTACTS.email }}</div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-600 group-hover:translate-x-1 transition">&rarr;</span>
+                </a>
+            </div>
+
+            <div class="text-center pt-2">
+                <button type="button" onclick="closeContactModal()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                    Закрыть окно
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/js/app.js"></script>
+    <script>
+        function openContactModal() {
+            document.getElementById('contact-tutor-modal').classList.remove('hidden');
+        }
+        function closeContactModal() {
+            document.getElementById('contact-tutor-modal').classList.add('hidden');
+        }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -10,7 +10,8 @@ from app.config import (
     UPLOAD_DIR,
     GDRIVE_SERVICE_ACCOUNT_FILE,
     GDRIVE_OAUTH_CREDENTIALS_FILE,
-    GDRIVE_FOLDER_ID
+    GDRIVE_FOLDER_ID,
+    GDRIVE_SERVICE_ACCOUNT_EMAIL
 )
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,13 @@ class StorageService:
     def __init__(self):
         self.drive_service = None
         self.storage_mode = "local"  # 'gdrive' or 'local'
+        self.init_error = None
+        self._initialize_gdrive()
+
+    def reload(self):
+        """Re-initializes the Google Drive client."""
+        self.drive_service = None
+        self.storage_mode = "local"
         self.init_error = None
         self._initialize_gdrive()
 
@@ -58,8 +66,7 @@ class StorageService:
         oauth_path = Path(GDRIVE_OAUTH_CREDENTIALS_FILE)
         if oauth_path.exists():
             try:
-                # If oauth credentials file exists, try basic load if token exists
-                token_file = sa_path.parent / "token.json"
+                token_file = oauth_path.parent / "token.json"
                 if token_file.exists():
                     from google.oauth2.credentials import Credentials
                     credentials = Credentials.from_authorized_user_file(str(token_file))
@@ -75,17 +82,18 @@ class StorageService:
         # Fallback to local
         self.storage_mode = "local"
         if not self.init_error:
-            self.init_error = "Файл учетных данных Google Drive (service_account.json) не найден. Включен локальный режим хранения."
+            self.init_error = "Файл ключа service_account.json пока не загружен. Работает локальное хранилище."
 
     def get_status(self) -> Dict[str, Any]:
         """Returns the current storage configuration and status."""
         return {
             "mode": self.storage_mode,
             "is_gdrive": self.storage_mode == "gdrive",
+            "service_account_email": GDRIVE_SERVICE_ACCOUNT_EMAIL,
             "service_account_exists": Path(GDRIVE_SERVICE_ACCOUNT_FILE).exists(),
             "oauth_exists": Path(GDRIVE_OAUTH_CREDENTIALS_FILE).exists(),
             "status_message": "Google Drive подключен и активен" if self.storage_mode == "gdrive" else self.init_error or "Локальный режим",
-            "folder_id": GDRIVE_FOLDER_ID or "Корень диска (Root)"
+            "folder_id": GDRIVE_FOLDER_ID or "10Mgxt-wQU26xs_ubKdLQEXbitPtHVkkt"
         }
 
     async def upload_file(self, upload_file: UploadFile) -> Dict[str, Any]:
@@ -101,10 +109,11 @@ class StorageService:
         if self.storage_mode == "gdrive" and self.drive_service:
             try:
                 file_metadata = {
-                    'name': f"KiberOne_{original_filename}",
+                    'name': f"KIBERone_{original_filename}",
                 }
-                if GDRIVE_FOLDER_ID.strip():
-                    file_metadata['parents'] = [GDRIVE_FOLDER_ID.strip()]
+                folder_id = GDRIVE_FOLDER_ID.strip()
+                if folder_id:
+                    file_metadata['parents'] = [folder_id]
 
                 media = MediaIoBaseUpload(
                     io.BytesIO(content),
@@ -142,7 +151,6 @@ class StorageService:
                 }
             except Exception as e:
                 logger.error(f"Google Drive upload failed, falling back to local: {e}")
-                # Fallback to local below
 
         # Local storage fallback
         safe_prefix = uuid.uuid4().hex[:8]

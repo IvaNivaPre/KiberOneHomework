@@ -8,7 +8,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg">
+                <span class="w-10 h-10 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] flex items-center justify-center text-lg">
                     <i class="fa-solid fa-user-graduate"></i>
                 </span>
                 <span>Резиденты KIBERone</span>
@@ -21,8 +21,8 @@
         
         <!-- Add Student Form -->
         <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 h-fit">
-            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-purple-600"></i>
+            <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-[#13c9ba]"></i>
                 <span>Добавить резидента</span>
             </h2>
 
@@ -30,25 +30,25 @@
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">ФИО Ученика</label>
                     <input type="text" name="full_name" required placeholder="Например: Артем Соколов"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-medium">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Логин для входа</label>
                     <input type="text" name="username" required placeholder="Например: artem_s"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-medium">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Пароль</label>
                     <input type="text" name="password" required value="kiber123"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-mono font-medium">
-                    <p class="text-[11px] text-slate-400 mt-1">Можно задать простой пароль для ребенка</p>
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-mono font-medium">
+                    <p class="text-[11px] text-slate-400 mt-1">Простой пароль для ребенка</p>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Группа</label>
-                    <select name="group_id" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                    <select name="group_id" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-medium">
                         <option value="">Без группы</option>
                         {% for g in groups %}
                         <option value="{{ g.id }}">{{ g.name }}</option>
@@ -56,7 +56,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20 transition flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full py-3 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-check"></i>
                     <span>Создать аккаунт ученика</span>
                 </button>
@@ -66,8 +66,8 @@
         <!-- Students List -->
         <div class="lg:col-span-2 space-y-4">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-emerald-600"></i>
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-[#13c9ba]"></i>
                     <span>Список резидентов и данные для входа ({{ students|length }})</span>
                 </h2>
             </div>
@@ -89,14 +89,14 @@
                                 {% for s in students %}
                                 <tr class="hover:bg-slate-50/80 transition">
                                     <td class="p-4 font-bold text-slate-900 flex items-center space-x-3">
-                                        <div class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold text-xs">
+                                        <div class="w-8 h-8 rounded-full bg-[#13c9ba]/15 text-slate-900 flex items-center justify-center font-bold text-xs">
                                             {{ s.full_name[:1] }}
                                         </div>
                                         <span>{{ s.full_name }}</span>
                                     </td>
                                     <td class="p-4">
                                         {% if s.group %}
-                                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100">
+                                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                                                 {{ s.group.name }}
                                             </span>
                                         {% else %}
@@ -107,7 +107,7 @@
                                         {{ s.username }}
                                     </td>
                                     <td class="p-4 font-mono text-xs text-slate-700">
-                                        <span class="bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                                        <span class="bg-slate-100 px-2 py-1 rounded border border-slate-200 font-bold">
                                             {{ s.plain_password or '••••••••' }}
                                         </span>
                                     </td>

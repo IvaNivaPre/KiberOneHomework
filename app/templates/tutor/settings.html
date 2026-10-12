@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Настройки Google Drive — KIBERone{% endblock %}
+{% block title %}Настройки — KIBERone{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-8">
@@ -8,124 +8,165 @@
     <!-- Header -->
     <div>
         <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
-            <a href="/tutor/dashboard" class="hover:text-purple-600 transition">Главная</a>
+            <a href="/tutor/dashboard" class="hover:text-[#13c9ba] transition">Главная</a>
             <span>/</span>
-            <span class="text-slate-600 font-bold">Настройки хранилища</span>
+            <span class="text-slate-600 font-bold">Настройки системы</span>
         </div>
         <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <span class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
-                <i class="fa-brands fa-google-drive"></i>
+            <span class="w-10 h-10 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] flex items-center justify-center text-lg">
+                <i class="fa-solid fa-gear"></i>
             </span>
-            <span>Интеграция с Google Drive</span>
+            <span>Настройки Google Drive и Контактов</span>
         </h1>
-        <p class="text-sm text-slate-500 mt-1">Хранение материалов уроков и готовых заданий учеников в облаке Google</p>
     </div>
 
-    <!-- Storage Status Card -->
+    <!-- Alert Messages if any -->
+    {% if message %}
+        {% if message == 'key_saved' %}
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span>Ключ Google Drive успешно сохранен и подключен!</span>
+        </div>
+        {% elif message == 'contacts_saved' %}
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span>Контакты преподавателя обновлены!</span>
+        </div>
+        {% elif message.startswith('error_') %}
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs font-bold flex items-center space-x-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+            <span>Ошибка: {{ message[6:] }}</span>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Google Drive Card -->
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
-                <h2 class="text-lg font-bold text-slate-900">Текущий статус подключения</h2>
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-brands fa-google-drive text-[#13c9ba]"></i>
+                    <span>Google Drive Хранилище</span>
+                </h2>
                 <p class="text-xs text-slate-500 mt-0.5">{{ storage_status.status_message }}</p>
             </div>
             <div>
                 {% if storage_status.is_gdrive %}
-                    <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
                         Google Drive Активен
                     </span>
                 {% else %}
-                    <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
                         <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
-                        Локальный режим (Fallback)
+                        Локальный режим (ожидает ключ JSON)
                     </span>
                 {% endif %}
             </div>
         </div>
 
+        <!-- Google Cloud Details -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div class="text-slate-400 font-bold uppercase text-[10px]">Файл Service Account (service_account.json)</div>
-                <div class="text-slate-800 font-semibold mt-1 flex items-center gap-2">
-                    {% if storage_status.service_account_exists %}
-                        <i class="fa-solid fa-check text-emerald-500"></i>
-                        <span>Обнаружен в корне проекта</span>
-                    {% else %}
-                        <i class="fa-solid fa-xmark text-rose-500"></i>
-                        <span class="text-slate-500">Не найден (ожидается в корне проекта)</span>
-                    {% endif %}
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="text-slate-400 font-bold uppercase text-[10px]">Сервисный аккаунт Google:</div>
+                <div class="text-slate-900 font-mono font-bold break-all select-all">
+                    {{ storage_status.service_account_email }}
                 </div>
             </div>
 
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div class="text-slate-400 font-bold uppercase text-[10px]">Целевая папка Google Drive</div>
-                <div class="text-slate-800 font-semibold mt-1 font-mono">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="text-slate-400 font-bold uppercase text-[10px]">ID папки Google Drive (Parent ID):</div>
+                <div class="text-slate-900 font-mono font-bold break-all select-all">
                     {{ storage_status.folder_id }}
                 </div>
             </div>
         </div>
+
+        <!-- Upload JSON Key form -->
+        <div class="pt-2 border-t border-slate-100 space-y-4">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-key text-[#f7c90e]"></i>
+                <span>Загрузить ключ сервисного аккаунта (service_account.json)</span>
+            </h3>
+
+            <form action="/tutor/settings/upload_key" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Способ 1: Выберите JSON файл ключа</label>
+                        <input type="file" name="file" accept=".json"
+                               class="w-full text-xs text-slate-600 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#13c9ba] file:text-slate-950 hover:file:bg-[#0fa89b] cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Способ 2: Или вставьте текст JSON ключа</label>
+                        <textarea name="json_text" rows="3" placeholder='{"type": "service_account", ...}'
+                                  class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-mono"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="px-5 py-2.5 bg-[#14171f] hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-md flex items-center space-x-2">
+                    <i class="fa-solid fa-upload text-[#13c9ba]"></i>
+                    <span>Сохранить и подключить Google Drive</span>
+                </button>
+            </form>
+        </div>
     </div>
 
-    <!-- Step by Step Instructions -->
+    <!-- Tutor Contacts Card (Вместо чата: Telegram, MAX, Телефон, Почта) -->
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <i class="fa-solid fa-book-open text-purple-600"></i>
-            <span>Пошаговая инструкция по подключению Google Drive</span>
-        </h2>
-
-        <div class="space-y-4 text-sm text-slate-600">
-            <div class="flex items-start space-x-3.5">
-                <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">1</div>
-                <div>
-                    <h4 class="font-bold text-slate-900">Создайте проект в Google Cloud Console</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        Перейдите на <a href="https://console.cloud.google.com" target="_blank" class="text-blue-600 font-semibold hover:underline">console.cloud.google.com</a>, создайте проект (например, "KiberOne-Homework").
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-start space-x-3.5">
-                <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">2</div>
-                <div>
-                    <h4 class="font-bold text-slate-900">Включите Google Drive API</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        В разделе <strong>APIs & Services &rarr; Library</strong> найдите <strong>Google Drive API</strong> и нажмите <strong>Enable</strong>.
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-start space-x-3.5">
-                <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">3</div>
-                <div>
-                    <h4 class="font-bold text-slate-900">Создайте сервисный аккаунт (Service Account)</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        В разделе <strong>IAM & Admin &rarr; Service Accounts</strong> нажмите <strong>Create Service Account</strong>.
-                        Затем перейдите во вкладку <strong>Keys &rarr; Add Key &rarr; Create new key &rarr; JSON</strong>.
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-start space-x-3.5">
-                <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">4</div>
-                <div>
-                    <h4 class="font-bold text-slate-900">Сохраните файл ключа</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        Скачанный JSON-файл переименуйте в <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-purple-700">service_account.json</code> и положите в папку проекта:
-                        <br><code class="text-xs bg-slate-100 p-1 rounded font-mono block mt-1">C:\Users\ivush\.gemini\antigravity\scratch\kiberone_hw\service_account.json</code>
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-start space-x-3.5">
-                <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">5</div>
-                <div>
-                    <h4 class="font-bold text-slate-900">(Опционально) Назначьте общую папку на Google Диске</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        Создайте папку на Google Диске (например, "KiberOne ДЗ"), откройте к ней доступ (Editor) для email адреса сервисного аккаунта и укажите ID папки в переменной окружения <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-purple-700">GDRIVE_FOLDER_ID</code>.
-                    </p>
-                </div>
-            </div>
+        <div class="border-b border-slate-100 pb-4">
+            <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-address-book text-[#f7c90e]"></i>
+                <span>Контакты преподавателя для учеников</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+                Эти данные отображаются ученикам в окне «Связь с преподавателем» вместо чата.
+            </p>
         </div>
+
+        <form action="/tutor/settings/contacts" method="POST" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                        <i class="fa-brands fa-telegram text-sky-500 mr-1"></i> Ссылка на Telegram
+                    </label>
+                    <input type="text" name="telegram" value="{{ tutor_contacts.telegram }}"
+                           placeholder="https://t.me/kiberone_support"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                        <i class="fa-solid fa-phone text-emerald-500 mr-1"></i> Телефон / WhatsApp
+                    </label>
+                    <input type="text" name="phone" value="{{ tutor_contacts.phone }}"
+                           placeholder="+7 (495) 120-10-10"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                        <i class="fa-solid fa-robot text-[#f7c90e] mr-1"></i> Ссылка на MAX / Чат школы
+                    </label>
+                    <input type="text" name="max_link" value="{{ tutor_contacts.max }}"
+                           placeholder="https://max.kiber-one.com"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                        <i class="fa-solid fa-envelope text-slate-500 mr-1"></i> Email преподавателя
+                    </label>
+                    <input type="email" name="email" value="{{ tutor_contacts.email }}"
+                           placeholder="tutor@kiber-one.com"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-xs font-medium">
+                </div>
+            </div>
+
+            <button type="submit" class="px-5 py-2.5 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-xs rounded-xl transition shadow-md flex items-center space-x-2">
+                <i class="fa-solid fa-check"></i>
+                <span>Сохранить контакты</span>
+            </button>
+        </form>
     </div>
 
 </div>

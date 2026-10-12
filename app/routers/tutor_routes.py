@@ -494,13 +494,66 @@ def tutor_add_student(
     return RedirectResponse(url="/tutor/students", status_code=status.HTTP_303_SEE_OTHER)
 
 
-# --- Settings & Google Drive status ---
-
 @router.get("/settings", response_class=HTMLResponse)
 def tutor_settings(request: Request, db: Session = Depends(get_db), current_user: User = Depends(require_tutor)):
     storage_status = storage_service.get_status()
+    from app.config import TUTOR_CONTACTS
     return templates.TemplateResponse(
         request=request,
         name="tutor/settings.html",
-        context={"current_user": current_user, "storage_status": storage_status}
+        context={
+            "current_user": current_user,
+            "storage_status": storage_status,
+            "tutor_contacts": TUTOR_CONTACTS,
+            "message": request.query_params.get("msg")
+        }
     )
+
+
+@router.post("/settings/upload_key")
+async def tutor_settings_upload_key(
+    file: Optional[UploadFile] = File(None),
+    json_text: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_tutor)
+):
+    from app.config import GDRIVE_SERVICE_ACCOUNT_FILE
+    content = ""
+    if file and file.filename:
+        file_bytes = await file.read()
+        content = file_bytes.decode("utf-8", errors="ignore")
+    elif json_text and json_text.strip():
+        content = json_text.strip()
+
+    if content:
+        # Validate that it's json
+        try:
+            json.loads(content)
+            with open(GDRIVE_SERVICE_ACCOUNT_FILE, "w", encoding="utf-8") as f:
+                f.write(content)
+            storage_service.reload()
+            return RedirectResponse(url="/tutor/settings?msg=key_saved", status_code=status.HTTP_303_SEE_OTHER)
+        except Exception as e:
+            return RedirectResponse(url=f"/tutor/settings?msg=error_{str(e)}", status_code=status.HTTP_303_SEE_OTHER)
+
+    return RedirectResponse(url="/tutor/settings", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/settings/contacts")
+def tutor_settings_update_contacts(
+    phone: str = Form(""),
+    telegram: str = Form(""),
+    email: str = Form(""),
+    whatsapp: str = Form(""),
+    max_link: str = Form(""),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_tutor)
+):
+    from app.config import TUTOR_CONTACTS
+    TUTOR_CONTACTS["phone"] = phone.strip()
+    TUTOR_CONTACTS["telegram"] = telegram.strip()
+    TUTOR_CONTACTS["email"] = email.strip()
+    TUTOR_CONTACTS["whatsapp"] = whatsapp.strip()
+    TUTOR_CONTACTS["max"] = max_link.strip()
+    return RedirectResponse(url="/tutor/settings?msg=contacts_saved", status_code=status.HTTP_303_SEE_OTHER)
+

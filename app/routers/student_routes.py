@@ -34,6 +34,29 @@ def student_dashboard(request: Request, db: Session = Depends(get_db), current_u
 
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
+    # Separate into pending lessons and completed lessons for children
+    pending_items = []
+    completed_items = []
+
+    for mod in modules:
+        for lesson in mod.lessons:
+            sub = sub_map.get(lesson.id)
+            qr = quiz_map.get(lesson.quiz.id) if lesson.quiz else None
+            is_completed = bool(sub or (qr and qr.passed))
+
+            item = {
+                "module": mod,
+                "lesson": lesson,
+                "submission": sub,
+                "quiz_result": qr,
+                "is_completed": is_completed,
+                "is_overdue": bool(lesson.deadline and now > lesson.deadline and not is_completed)
+            }
+            if is_completed:
+                completed_items.append(item)
+            else:
+                pending_items.append(item)
+
     return templates.TemplateResponse(
         request=request,
         name="student/dashboard.html",
@@ -43,6 +66,8 @@ def student_dashboard(request: Request, db: Session = Depends(get_db), current_u
             "modules": modules,
             "sub_map": sub_map,
             "quiz_map": quiz_map,
+            "pending_items": pending_items,
+            "completed_items": completed_items,
             "now": now
         }
     )

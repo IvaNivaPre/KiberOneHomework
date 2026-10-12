@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 50" width="240" height="50">
+  <!-- Brand Logo Text -->
+  <text x="5" y="36" font-family="'Inter', 'Montserrat', 'Segoe UI', sans-serif" font-weight="900" font-size="34" letter-spacing="-0.5" fill="#ffffff">
+    KIBER<tspan fill="#13c9ba">one</tspan>
+  </text>
+  <circle cx="218" cy="18" r="4.5" fill="#f7c90e"/>
+</svg>

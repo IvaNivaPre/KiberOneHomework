@@ -12,14 +12,24 @@ ALGORITHM = "HS256"
 COOKIE_NAME = "kiberone_session"
 
 # Google Drive Configuration
-# You can place service_account.json or credentials.json in BASE_DIR or specify a path
+GDRIVE_SERVICE_ACCOUNT_EMAIL = "kiberone@kiberone-hw.iam.gserviceaccount.com"
+GDRIVE_FOLDER_ID = os.getenv("GDRIVE_FOLDER_ID", "10Mgxt-wQU26xs_ubKdLQEXbitPtHVkkt")
 GDRIVE_SERVICE_ACCOUNT_FILE = os.getenv(
     "GDRIVE_SERVICE_ACCOUNT_FILE", str(BASE_DIR / "service_account.json")
 )
 GDRIVE_OAUTH_CREDENTIALS_FILE = os.getenv(
     "GDRIVE_OAUTH_CREDENTIALS_FILE", str(BASE_DIR / "credentials.json")
 )
-GDRIVE_FOLDER_ID = os.getenv("GDRIVE_FOLDER_ID", "")  # Optional target root folder in Google Drive
+
+# Contacts with tutor (default fallbacks for Telegram, Phone, Email, MAX, WhatsApp)
+TUTOR_CONTACTS = {
+    "phone": os.getenv("TUTOR_PHONE", "+7 (495) 120-10-10"),
+    "telegram": os.getenv("TUTOR_TELEGRAM", "https://t.me/kiberone_moscow"),
+    "telegram_handle": os.getenv("TUTOR_TELEGRAM_HANDLE", "@kiberone_moscow"),
+    "email": os.getenv("TUTOR_EMAIL", "info@kiber-one.com"),
+    "whatsapp": os.getenv("TUTOR_WHATSAPP", "https://wa.me/74951201010"),
+    "max": os.getenv("TUTOR_MAX", "https://max.kiber-one.com")
+}
 
 # Local upload directory fallback / staging
 UPLOAD_DIR = BASE_DIR / "uploads"

@@ -9,16 +9,16 @@
     <div class="flex items-center justify-between">
         <div>
             <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-1">
-                <a href="/student/lesson/{{ quiz.lesson_id }}" class="hover:text-purple-600 transition">&larr; Вернуться к уроку</a>
+                <a href="/student/lesson/{{ quiz.lesson_id }}" class="hover:text-[#13c9ba] transition">&larr; Вернуться к уроку</a>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg">
+                <span class="w-10 h-10 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] flex items-center justify-center text-lg">
                     <i class="fa-solid fa-brain"></i>
                 </span>
                 <span>{{ quiz.title }}</span>
             </h1>
             <p class="text-xs text-slate-500 mt-1">
-                Порог успешной сдачи: <strong class="text-purple-700">{{ quiz.passing_score }}%</strong> правильных ответов
+                Порог успешной сдачи: <strong class="text-slate-900">{{ quiz.passing_score }}%</strong> правильных ответов
             </p>
         </div>
 
@@ -37,7 +37,7 @@
         {% for q in questions %}
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-4">
             <div class="flex items-center justify-between">
-                <span class="px-2.5 py-1 rounded-full text-xs font-black bg-purple-100 text-purple-800">
+                <span class="px-2.5 py-1 rounded-full text-xs font-black bg-[#13c9ba]/15 text-[#0fa89b]">
                     Вопрос #{{ loop.index }}
                 </span>
                 <span class="text-xs font-semibold text-slate-400">
@@ -45,7 +45,7 @@
                 </span>
             </div>
 
-            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+            <h3 class="text-base sm:text-lg font-black text-slate-900 leading-snug">
                 {{ q.text }}
             </h3>
 
@@ -53,19 +53,19 @@
             <div class="pt-2 space-y-2">
                 {% if q.type == 'single' %}
                     {% for opt in q.options %}
-                    <label class="flex items-center space-x-3 p-3.5 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 cursor-pointer transition">
+                    <label class="flex items-center space-x-3 p-3.5 rounded-2xl border border-slate-200 hover:border-[#13c9ba] hover:bg-slate-50 cursor-pointer transition">
                         <input type="radio" name="question_{{ q.id }}" value="{{ opt }}" required
-                               class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                               class="w-4 h-4 text-[#13c9ba] focus:ring-[#13c9ba]">
                         <span class="text-sm font-medium text-slate-800">{{ opt }}</span>
                     </label>
                     {% endfor %}
 
                 {% elif q.type == 'multiple' %}
-                    <p class="text-[11px] font-semibold text-purple-600">Выберите один или несколько вариантов:</p>
+                    <p class="text-[11px] font-bold text-[#13c9ba]">Выберите один или несколько вариантов:</p>
                     {% for opt in q.options %}
-                    <label class="flex items-center space-x-3 p-3.5 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50/40 cursor-pointer transition">
+                    <label class="flex items-center space-x-3 p-3.5 rounded-2xl border border-slate-200 hover:border-[#13c9ba] hover:bg-slate-50 cursor-pointer transition">
                         <input type="checkbox" name="question_{{ q.id }}" value="{{ opt }}"
-                               class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
+                               class="w-4 h-4 text-[#13c9ba] rounded focus:ring-[#13c9ba]">
                         <span class="text-sm font-medium text-slate-800">{{ opt }}</span>
                     </label>
                     {% endfor %}
@@ -75,7 +75,7 @@
                     <div>
                         <input type="text" name="question_{{ q.id }}" required
                                placeholder="Введите ваш ответ..."
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm font-medium">
+                               class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] text-sm font-medium">
                     </div>
                 {% endif %}
             </div>
@@ -84,9 +84,9 @@
 
         <div class="pt-4">
             <button type="submit"
-                    class="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 hover:from-emerald-700 hover:to-cyan-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-600/30 transition flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>Завершить тест и проверить результат</span>
+                    class="w-full py-4 px-6 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-[#f7c90e]/25 transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-circle-check text-base"></i>
+                <span>Завершить тест и проверить результат!</span>
             </button>
         </div>
     </form>

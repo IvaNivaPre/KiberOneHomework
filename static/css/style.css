@@ -1,9 +1,9 @@
 /* Custom styles for KIBERone HW Platform */
 
-@layer utilities {
-    .animate-pulse-subtle {
-        animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
+:root {
+    --kiber-teal: #13c9ba;
+    --kiber-yellow: #f7c90e;
+    --kiber-dark: #14171f;
 }
 
 /* Custom Scrollbar for matrix and code blocks */
@@ -23,10 +23,10 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #13c9ba;
 }
 
-/* Card hover smooth transition */
+/* Smooth transitions */
 .hover-lift {
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -34,4 +34,20 @@
 .hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+/* Modal animation */
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-scale-up {
+    animation: scaleUp 0.2s ease-out forwards;
 }

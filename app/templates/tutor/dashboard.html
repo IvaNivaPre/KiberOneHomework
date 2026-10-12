@@ -6,69 +6,69 @@
 <div class="space-y-8">
 
     <!-- Top Banner -->
-    <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="space-y-2 z-10">
-            <div class="inline-flex items-center space-x-2 bg-purple-500/30 text-purple-200 border border-purple-400/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+    <div class="bg-gradient-to-r from-[#14171f] via-[#1c2230] to-[#14171f] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-[#232938] flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-[#13c9ba]/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="space-y-2.5 z-10">
+            <div class="inline-flex items-center space-x-2 bg-[#13c9ba]/15 text-[#13c9ba] border border-[#13c9ba]/30 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
                 <i class="fa-solid fa-chalkboard-user"></i>
-                <span>Кабинет преподавателя / тьютора</span>
+                <span>Кабинет тьютора KIBERone</span>
             </div>
-            <h1 class="text-3xl font-black tracking-tight">Приветствуем, {{ current_user.full_name }}! 👋</h1>
-            <p class="text-purple-200/80 text-sm max-w-xl">
-                Управляйте группами, создавайте уроки с материалами на Google Drive, формируйте тесты и мгновенно отслеживайте выполнение ДЗ учениками.
+            <h1 class="text-3xl font-black tracking-tight text-white">Приветствуем, {{ current_user.full_name }}! 👋</h1>
+            <p class="text-slate-300 text-sm max-w-xl">
+                Управляйте группами, создавайте уроки с файлами на Google Drive, формируйте тесты и отслеживайте выполнение ДЗ учениками по «Светофору».
             </p>
         </div>
         
         <!-- Storage indicator card -->
-        <div class="z-10 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 flex items-center space-x-4 min-w-[260px]">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl {% if storage_status.is_gdrive %}bg-blue-500/20 text-blue-400{% else %}bg-amber-500/20 text-amber-400{% endif %}">
+        <div class="z-10 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center space-x-4 min-w-[260px]">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl {% if storage_status.is_gdrive %}bg-emerald-500/20 text-emerald-400{% else %}bg-[#f7c90e]/20 text-[#f7c90e]{% endif %}">
                 <i class="fa-brands fa-google-drive"></i>
             </div>
             <div>
-                <div class="text-xs font-semibold text-slate-300">Хранилище файлов</div>
-                <div class="text-sm font-bold flex items-center gap-1.5">
+                <div class="text-xs font-semibold text-slate-300">Облачное хранилище</div>
+                <div class="text-sm font-black flex items-center gap-1.5">
                     {% if storage_status.is_gdrive %}
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         <span class="text-emerald-300">Google Drive подключен</span>
                     {% else %}
-                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                        <span class="text-amber-300">Локальный режим</span>
+                        <span class="w-2 h-2 rounded-full bg-[#f7c90e]"></span>
+                        <span class="text-[#f7c90e]">Локальный режим</span>
                     {% endif %}
                 </div>
-                <a href="/tutor/settings" class="text-[11px] text-cyan-300 hover:underline">Подробнее / Настройка &rarr;</a>
+                <a href="/tutor/settings" class="text-[11px] text-[#13c9ba] hover:underline font-bold">Настроить Google Drive &rarr;</a>
             </div>
         </div>
     </div>
 
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-[#13c9ba]/15 text-[#13c9ba] flex items-center justify-center text-2xl font-black">
                 <i class="fa-solid fa-users"></i>
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900">{{ groups|length }}</div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Учебных групп</div>
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Учебных групп</div>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-2xl">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-[#f7c90e]/20 text-slate-900 flex items-center justify-center text-2xl font-black">
                 <i class="fa-solid fa-user-graduate"></i>
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900">{{ students_count }}</div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Всего резидентов</div>
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Резидентов школы</div>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-black">
                 <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
             <div>
                 <div class="text-2xl font-black text-slate-900">{{ pending_submissions|length }}</div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ожидают проверки</div>
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ожидают проверки</div>
             </div>
         </div>
     </div>
@@ -78,13 +78,13 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
                 <h2 class="text-xl font-black text-slate-900 flex items-center gap-2.5">
-                    <i class="fa-solid fa-layer-group text-purple-600"></i>
+                    <i class="fa-solid fa-layer-group text-[#13c9ba]"></i>
                     <span>Ваши учебные группы</span>
                 </h2>
                 <p class="text-xs text-slate-500 mt-1">Отслеживайте сдачу заданий с помощью светофора (зеленая / красная галочка)</p>
             </div>
-            <a href="/tutor/groups" class="inline-flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-md shadow-purple-600/20">
-                <i class="fa-solid fa-plus"></i>
+            <a href="/tutor/groups" class="inline-flex items-center space-x-2 px-4 py-2 bg-[#14171f] hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-md">
+                <i class="fa-solid fa-plus text-[#13c9ba]"></i>
                 <span>Добавить группу</span>
             </a>
         </div>
@@ -92,13 +92,13 @@
         {% if groups %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for g in groups %}
-                <div class="rounded-2xl border border-slate-200 hover:border-purple-300 p-5 bg-gradient-to-b from-white to-slate-50/50 hover:shadow-md transition flex flex-col justify-between space-y-4">
+                <div class="rounded-3xl border-2 border-slate-200 hover:border-[#13c9ba] p-6 bg-white hover:shadow-lg transition flex flex-col justify-between space-y-4">
                     <div class="space-y-2">
                         <div class="flex items-start justify-between">
-                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">
+                            <span class="px-3 py-1 rounded-full text-xs font-black bg-[#13c9ba]/15 text-[#0fa89b]">
                                 {{ g.students|length }} учеников
                             </span>
-                            <span class="text-xs text-slate-400 font-medium">
+                            <span class="text-xs text-slate-400 font-semibold">
                                 {{ g.modules|length }} модулей
                             </span>
                         </div>
@@ -110,16 +110,16 @@
                     <div class="pt-4 border-t border-slate-100 space-y-2">
                         <!-- Matrix Button (Traffic Light) -->
                         <a href="/tutor/group/{{ g.id }}/matrix"
-                           class="w-full py-2.5 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-sm shadow-emerald-600/30">
+                           class="w-full py-3 px-3 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-[#f7c90e]/20">
                             <i class="fa-solid fa-traffic-light text-sm"></i>
                             <span>Светофор сдачи ДЗ (Матрица)</span>
                             <i class="fa-solid fa-arrow-right text-[10px]"></i>
                         </a>
                         <div class="grid grid-cols-2 gap-2">
-                            <a href="/tutor/group/{{ g.id }}" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs text-center transition">
+                            <a href="/tutor/group/{{ g.id }}" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs text-center transition">
                                 Модули и уроки
                             </a>
-                            <a href="/tutor/students" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs text-center transition">
+                            <a href="/tutor/students" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs text-center transition">
                                 Резиденты
                             </a>
                         </div>
@@ -132,7 +132,7 @@
                 <i class="fa-solid fa-school text-4xl text-slate-300 mb-3"></i>
                 <div class="font-bold text-slate-700">Группы пока не созданы</div>
                 <div class="text-xs text-slate-500 mt-1 mb-4">Создайте первую группу детей для распределения уроков и домашних заданий</div>
-                <a href="/tutor/groups" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl inline-flex items-center space-x-2">
+                <a href="/tutor/groups" class="px-4 py-2 bg-[#13c9ba] hover:bg-[#0fa89b] text-slate-950 font-black text-xs rounded-xl inline-flex items-center space-x-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Создать группу</span>
                 </a>
@@ -150,7 +150,7 @@
                 </h2>
                 <p class="text-xs text-slate-500 mt-1">Работы учеников, требующие оценки или обратной связи</p>
             </div>
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+            <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800">
                 {{ pending_submissions|length }} новых работ
             </span>
         </div>
@@ -171,7 +171,7 @@
                         {% for sub in pending_submissions %}
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="px-4 py-3.5 font-bold text-slate-900 flex items-center space-x-2.5">
-                                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                                <div class="w-8 h-8 rounded-full bg-[#13c9ba]/20 text-slate-900 flex items-center justify-center font-bold text-xs">
                                     {{ sub.student.full_name[:1] }}
                                 </div>
                                 <span>{{ sub.student.full_name }}</span>
@@ -182,13 +182,13 @@
                             </td>
                             <td class="px-4 py-3.5">
                                 {% if sub.file_url %}
-                                    <span class="inline-flex items-center text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-200">
+                                    <span class="inline-flex items-center text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
                                         <i class="fa-solid fa-paperclip mr-1.5"></i> Файл: {{ sub.file_name or 'Прикреплен' }}
                                     </span>
                                 {% endif %}
                                 {% if sub.text_answer %}
-                                    <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
-                                        <i class="fa-solid fa-align-left mr-1.5"></i> Текст / Код
+                                    <span class="inline-flex items-center text-xs font-semibold text-[#0fa89b] bg-cyan-50 px-2.5 py-1 rounded-md border border-cyan-200">
+                                        <i class="fa-solid fa-align-left mr-1.5"></i> Ответ / Пояснение
                                     </span>
                                 {% endif %}
                             </td>
@@ -196,7 +196,7 @@
                                 {{ sub.submitted_at|datetime }}
                             </td>
                             <td class="px-4 py-3.5 text-right">
-                                <a href="/tutor/submission/{{ sub.id }}" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-lg transition shadow-sm shadow-purple-600/20">
+                                <a href="/tutor/submission/{{ sub.id }}" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black text-xs rounded-xl transition shadow-sm">
                                     <i class="fa-solid fa-check-double"></i>
                                     <span>Проверить</span>
                                 </a>

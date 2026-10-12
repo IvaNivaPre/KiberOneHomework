@@ -8,15 +8,18 @@
         
         <!-- Header -->
         <div class="text-center mb-8">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-400 mx-auto flex items-center justify-center font-black text-white text-3xl shadow-lg shadow-purple-500/30 mb-4">
-                K1
+            <div class="mb-4 flex items-center justify-center">
+                <img src="https://kiber-one.com/img/redesign2/logo.svg"
+                     onerror="this.onerror=null; this.src='/static/img/kiberone_logo.svg';"
+                     alt="KIBERone"
+                     class="h-10 w-auto">
             </div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">Личный кабинет</h1>
-            <p class="text-sm text-slate-500 mt-1">Вход для учеников и тьюторов KIBERone</p>
+            <p class="text-xs text-slate-500 mt-1">Платформа сдачи домашних заданий KIBERone</p>
         </div>
 
         {% if error %}
-        <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center space-x-3">
+        <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center space-x-3">
             <i class="fa-solid fa-circle-exclamation text-rose-500 text-base"></i>
             <span>{{ error }}</span>
         </div>
@@ -25,31 +28,31 @@
         <!-- Form -->
         <form action="/login" method="POST" class="space-y-5">
             <div>
-                <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Логин ученика / тьютора</label>
+                <label for="username" class="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Логин ученика / тьютора</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-user"></i>
                     </div>
                     <input type="text" id="username" name="username" value="{{ username or '' }}" required autofocus
-                           placeholder="Например: ivan_petrov"
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-sm font-medium transition">
+                           placeholder="Например: student1 или tutor"
+                           class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] focus:border-transparent text-sm font-medium transition">
                 </div>
             </div>
 
             <div>
-                <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Пароль</label>
+                <label for="password" class="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Пароль</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-lock"></i>
                     </div>
                     <input type="password" id="password" name="password" required
                            placeholder="••••••••"
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-sm font-medium transition">
+                           class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#13c9ba] focus:border-transparent text-sm font-medium transition">
                 </div>
             </div>
 
             <button type="submit"
-                    class="w-full py-3.5 px-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white font-bold rounded-xl shadow-lg shadow-purple-600/30 transition transform active:scale-98 flex items-center justify-center space-x-2">
+                    class="w-full py-3.5 px-4 bg-[#f7c90e] hover:bg-[#dfb408] text-slate-950 font-black rounded-2xl shadow-lg shadow-[#f7c90e]/30 transition transform active:scale-98 flex items-center justify-center space-x-2 cursor-pointer">
                 <span>Войти в аккаунт</span>
                 <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
@@ -57,20 +60,20 @@
 
         <!-- Quick Demo Credentials Box -->
         <div class="mt-8 pt-6 border-t border-slate-100">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 text-center">
+            <div class="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-3 text-center">
                 Быстрый вход для проверки (Демо)
             </div>
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <button type="button" onclick="fillCreds('tutor', 'kiber2026')"
-                        class="p-2.5 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-100/70 text-purple-900 font-semibold text-left transition flex flex-col">
-                    <span class="text-[10px] text-purple-500 font-bold uppercase">Тьютор</span>
-                    <span>login: tutor</span>
+                        class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#13c9ba]/10 hover:border-[#13c9ba] text-slate-900 font-semibold text-left transition flex flex-col cursor-pointer">
+                    <span class="text-[10px] text-[#13c9ba] font-black uppercase">Тьютор</span>
+                    <span class="font-bold">login: tutor</span>
                     <span class="text-slate-500 font-normal">pass: kiber2026</span>
                 </button>
                 <button type="button" onclick="fillCreds('student1', 'student123')"
-                        class="p-2.5 rounded-xl border border-cyan-200 bg-cyan-50/50 hover:bg-cyan-100/70 text-cyan-900 font-semibold text-left transition flex flex-col">
-                    <span class="text-[10px] text-cyan-600 font-bold uppercase">Ученик</span>
-                    <span>login: student1</span>
+                        class="p-2.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#f7c90e]/20 hover:border-[#f7c90e] text-slate-900 font-semibold text-left transition flex flex-col cursor-pointer">
+                    <span class="text-[10px] text-amber-600 font-black uppercase">Ученик</span>
+                    <span class="font-bold">login: student1</span>
                     <span class="text-slate-500 font-normal">pass: student123</span>
                 </button>
             </div>
